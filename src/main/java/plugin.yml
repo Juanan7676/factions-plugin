@@ -1,0 +1,23 @@
+name: JFactions
+main: com.juanan76.factions.Main
+version: 0.1
+api-version: 1.13
+commands:
+    login:
+        description: login a player into the server
+        usage: /login <password>
+    register:
+        description: register a player into the server
+        usage: /register <password>
+    f:
+        description: various commands to manage factions
+        usage: /f <[c]reate|[j]oin|[a]dm|[w]ar|[f]riend> [... subcommand arguments ...]
+    tele:
+        description: initiate a teleport to a friendly player
+        usage: /tele <userID>
+    pay:
+        description: give a player money
+        usage: /pay <user> <qty>
+    sell:
+        description: sell your item in hand to the server
+        usage: /sell
