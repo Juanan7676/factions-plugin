@@ -40,13 +40,16 @@ public class SellingItem {
 	public ItemStack getItemStack(int qty)
 	{
 		ItemStack i = new ItemStack(this.m,qty);
-		i.addUnsafeEnchantments(ench);
+		if (this.ench != null)
+			i.addUnsafeEnchantments(this.ench);
 		ItemMeta it = i.getItemMeta();
 		it.setDisplayName(this.name);
-		it.setLore(this.lore);
+		if (this.lore != null)
+			it.setLore(this.lore);
 		if (this.hideEnchants)
 			it.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 		i.setItemMeta(it);
+		
 		return i;
 	}
 	

@@ -41,7 +41,7 @@ public abstract class NPC implements Listener {
 		return;
 	}
 	
-	protected void handleClose(FPlayer closer)
+	protected void handleClose(InventoryCloseEvent e)
 	{
 		return;
 	}
@@ -49,7 +49,9 @@ public abstract class NPC implements Listener {
 	@EventHandler
 	public void onInteract(PlayerInteractAtEntityEvent e)
 	{
-		if (e.getRightClicked().getUniqueId().equals(this.npc.getUniqueId()))
+		if (!Main.players.get(e.getPlayer()).isLogged())
+			e.setCancelled(true);
+		else if (e.getRightClicked().getUniqueId().equals(this.npc.getUniqueId()))
 		{
 			if (!this.isMultiple() && this.interacters.size()>0)
 				e.setCancelled(true);
@@ -91,16 +93,14 @@ public abstract class NPC implements Listener {
 	@EventHandler
 	public void onClick(InventoryClickEvent e)
 	{
-		this.handleClick(e);
+		if (!Main.players.get(e.getWhoClicked()).isLogged())
+			e.setCancelled(true);
+		else this.handleClick(e);
 	}
 	
 	@EventHandler
 	public void onClose(InventoryCloseEvent e)
 	{
-		if (this.interacters.contains(Main.players.get(e.getPlayer())))
-		{
-			this.interacters.remove(Main.players.get(e.getPlayer()));
-		}
-		this.handleClose(Main.players.get(e.getPlayer()));
+		this.handleClose(e);
 	}
 }

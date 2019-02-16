@@ -3,11 +3,14 @@ package com.juanan76.factions.common;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -196,11 +199,13 @@ public class FListeners implements Listener {
 		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
 			@Override
 			public void run() {
-			NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),32,66,13),
-					Arrays.asList(new SellingItem[] { new SellingItem(Material.SPAWNER, ChatColor.GRAY+"Lvl 1 Generator", 10000, null, Arrays.asList(new String[] {ChatColor.UNDERLINE+ChatColor.GOLD.toString()+"Respect generation:"+ChatColor.RESET+ChatColor.GOLD+" 10 respect/hour"}), true) }));
-			Main.spawnShops.add(shopGeneradores);
-			Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
-			shopGeneradores.spawnEntity();
+				Map<Enchantment,Integer> lvl = new HashMap<Enchantment,Integer>();
+				lvl.put(Enchantment.ARROW_INFINITE, 1);
+				NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),32,66,13),
+					Arrays.asList(new SellingItem[] { new SellingItem(Material.SPAWNER, ChatColor.GRAY+ChatColor.BOLD.toString() + "Lvl 1 Generator", 10000, lvl, Arrays.asList(new String[] {"",ChatColor.GOLD.toString()+ChatColor.UNDERLINE+"Respect generation:"+ChatColor.RESET+ChatColor.GOLD+" 10 respect/hour"}), true) }));
+				Main.spawnShops.add(shopGeneradores);
+				Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
+				shopGeneradores.spawnEntity();
 			}
 		},1);
 	}
