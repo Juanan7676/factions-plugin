@@ -3,7 +3,9 @@ package com.juanan76.factions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -18,6 +20,7 @@ import com.juanan76.factions.common.Register;
 import com.juanan76.factions.common.Sell;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
+import com.juanan76.factions.npc.NPC;
 import com.juanan76.factions.pvp.PvpListeners;
 import com.juanan76.factions.pvp.PvpPlayer;
 import com.juanan76.factions.pvp.Tele;
@@ -32,6 +35,7 @@ public class Main extends JavaPlugin
 	public static final Map<Player,FPlayer> players = new HashMap<Player,FPlayer>();
 	public static final Map<Integer,Faction> factions = new HashMap<Integer,Faction>();
 	public static final Map<Integer,Teleport> teleports = new HashMap<Integer,Teleport>();
+	public static final List<NPC> spawnShops = new Vector<NPC>();
 	
 	@Override
 	public void onEnable()

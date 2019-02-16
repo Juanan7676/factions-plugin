@@ -2,10 +2,15 @@ package com.juanan76.factions.common;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,16 +21,21 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.server.ServerLoadEvent;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.tellraw.ClickableComponent;
 import com.juanan76.factions.common.tellraw.TextComponent;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.Plot;
+import com.juanan76.factions.npc.NPC;
+import com.juanan76.factions.npc.NPCShop;
+import com.juanan76.factions.npc.SellingItem;
 import com.juanan76.factions.pvp.PvpPlayer;
 import com.juanan76.factions.pvp.Teleport;
 
@@ -111,7 +121,8 @@ public class FListeners implements Listener {
 	public void onSpawn(EntitySpawnEvent e)
 	{
 		if (e.getEntityType() != EntityType.PLAYER)
-			if (e.getEntity().getLocation().distanceSquared(new Location(e.getEntity().getWorld(), 0, 0, 0)) <= 40000 && Util.convertWorld(e.getEntity().getWorld())==0 && e.getEntityType() != EntityType.DROPPED_ITEM)
+			if (e.getEntity().getLocation().distanceSquared(new Location(e.getEntity().getWorld(), 0, 0, 0)) <= 40000 && Util.convertWorld(e.getEntity().getWorld())==0 && e.getEntityType() != EntityType.DROPPED_ITEM
+					 && e.getEntityType() != EntityType.VILLAGER)
 				e.setCancelled(true);
 	}
 	
@@ -164,5 +175,38 @@ public class FListeners implements Listener {
 	{
 		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
 			e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onClick(InventoryClickEvent e)
+	{
+		FPlayer clicker = Main.players.get(e.getWhoClicked());
+		if (!clicker.isLogged())
+			e.setCancelled(true);
+		else
+		{
+			if (clicker.getShop()!=null)
+			{
+				
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onLoad(ServerLoadEvent e)
+	{
+		// Load server NPCs
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
+			@Override
+			public void run() {
+				Map<Enchantment,Integer> lvl = new HashMap<Enchantment,Integer>();
+				lvl.put(Enchantment.ARROW_INFINITE, 1);
+				NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),32,66,13),
+					Arrays.asList(new SellingItem[] { new SellingItem(Material.SPAWNER, ChatColor.GRAY+ChatColor.BOLD.toString() + "Lvl 1 Generator", 10000, lvl, Arrays.asList(new String[] {"",ChatColor.GOLD.toString()+ChatColor.UNDERLINE+"Respect generation:"+ChatColor.RESET+ChatColor.GOLD+" 10 respect/hour"}), true) }));
+				Main.spawnShops.add(shopGeneradores);
+				Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
+				shopGeneradores.spawnEntity();
+			}
+		},1);
 	}
 }

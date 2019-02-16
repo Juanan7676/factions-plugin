@@ -6,11 +6,14 @@ import java.sql.SQLException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.Plot;
+import com.juanan76.factions.npc.SellingItem;
 
 public class FPlayer {
 	private Player assoc;
@@ -22,6 +25,7 @@ public class FPlayer {
 	private int xchunk;
 	private int zchunk;
 	private int currTerritory;
+	private Inventory currShop;
 	
 	public static FPlayer fromID(int id)
 	{
@@ -191,5 +195,51 @@ public class FPlayer {
 	public int getCurrTerritory()
 	{
 		return this.currTerritory;
+	}
+	
+	public Inventory getShop()
+	{
+		return this.currShop;
+	}
+	
+	public void openShop(Inventory i)
+	{
+		this.currShop = i;
+		final Player a = this.assoc;
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class),new Runnable() {
+			@Override
+			public void run() {
+				a.openInventory(i);
+			}
+		},1);
+	}
+	public void closeShop()
+	{
+		this.assoc.closeInventory();
+		this.currShop = null;
+	}
+	
+	public boolean purchaseItem(SellingItem i, int qty)
+	{
+		if (this.money < i.getPurchasePrice(qty))
+		{
+			this.sendMessage(PluginPart.ECONOMY, ChatColor.RED + "You don't have enough money to purchase this item!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0F, 1.0F);
+			return false;
+		}
+		else if (Util.isFull(this.assoc.getInventory()))
+		{
+			this.sendMessage(PluginPart.ECONOMY, ChatColor.RED + "You don't have enough space in your inventory to purchase this item!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0F, 1.0F);
+			return false;
+		}
+		else
+		{
+			this.assoc.getInventory().addItem(i.getItemStack(qty));
+			this.addMoney(-i.getPurchasePrice(qty));
+			this.sendMessage(PluginPart.ECONOMY, ChatColor.GREEN + "Purchase successful!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_TRADE, 1.0F, 1.0F);
+			return true;
+		}
 	}
 }
