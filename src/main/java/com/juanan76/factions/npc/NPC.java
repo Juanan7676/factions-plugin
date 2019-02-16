@@ -1,6 +1,5 @@
 package com.juanan76.factions.npc;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.Location;
@@ -10,7 +9,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -33,12 +31,6 @@ public abstract class NPC implements Listener {
 	public abstract boolean isInvulnerable();
 	public abstract boolean isUnpusheable();
 	
-	public NPC()
-	{
-		this.interacters = new HashSet<FPlayer>();
-		this.spawnEntity();
-	}
-	
 	protected void stopInteraction(FPlayer p)
 	{
 		this.interacters.remove(p);
@@ -57,23 +49,18 @@ public abstract class NPC implements Listener {
 	@EventHandler
 	public void onInteract(PlayerInteractAtEntityEvent e)
 	{
-		if (e.getRightClicked().equals(this.npc))
+		if (e.getRightClicked().getUniqueId().equals(this.npc.getUniqueId()))
 		{
 			if (!this.isMultiple() && this.interacters.size()>0)
 				e.setCancelled(true);
 			else if (!this.interacters.contains(Main.players.get(e.getPlayer())))
 			{
+				e.getPlayer().closeInventory();
 				this.interact(Main.players.get(e.getPlayer()));
 				this.interacters.add(Main.players.get(e.getPlayer()));
+				e.setCancelled(true);
 			}
 		}
-	}
-	
-	@EventHandler
-	public void onDamage(EntityDamageEvent e)
-	{
-		if (this.isInvulnerable() && e.getEntity().equals(this.npc))
-			e.setCancelled(true);
 	}
 	
 	public void spawnEntity()
@@ -90,10 +77,13 @@ public abstract class NPC implements Listener {
 		}
 		if (flag)
 		{
-			this.npc = (LivingEntity)w.spawnEntity(this.getLoc(), this.getType());
+			this.npc = (LivingEntity) w.spawnEntity(this.getLoc(), this.getType());
+			this.npc.setAI(false);
 			this.npc.setSilent(true);
 			this.npc.setInvulnerable(true);
 			this.npc.setCollidable(false);
+			this.npc.setCustomNameVisible(true);
+			this.npc.setCustomName(this.getName());
 			this.npc.teleport(this.getLoc());
 		}
 	}
@@ -108,9 +98,9 @@ public abstract class NPC implements Listener {
 	public void onClose(InventoryCloseEvent e)
 	{
 		if (this.interacters.contains(Main.players.get(e.getPlayer())))
+		{
 			this.interacters.remove(Main.players.get(e.getPlayer()));
-		
+		}
 		this.handleClose(Main.players.get(e.getPlayer()));
-		
 	}
 }

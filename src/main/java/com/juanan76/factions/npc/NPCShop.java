@@ -1,6 +1,7 @@
 package com.juanan76.factions.npc;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ public class NPCShop extends NPC {
 	
 	public NPCShop(String name, Location l, List<SellingItem> stock)
 	{
+		super.interacters = new HashSet<FPlayer>();
 		this.name = name;
 		this.l = l;
 		this.interactions = new HashMap<FPlayer,Inventory>();
@@ -48,7 +50,7 @@ public class NPCShop extends NPC {
 			if (this.interactions.get(Main.players.get(e.getWhoClicked())).equals(e.getInventory()))
 			{
 				final FPlayer purchaser = Main.players.get(e.getWhoClicked());
-				SellingItem purchase = stock.get(e.getSlot()/2);
+				SellingItem purchase = stock.get(e.getSlot()/2-1);
 				boolean result = purchaser.purchaseItem(purchase, 1);
 				e.setCancelled(true);
 				if (!result)
@@ -69,7 +71,10 @@ public class NPCShop extends NPC {
 	public void handleClose(FPlayer closer)
 	{
 		if (this.interactions.containsKey(closer))
+		{
 			this.interactions.remove(closer);
+			closer.closeShop();
+		}
 	}
 
 	@Override

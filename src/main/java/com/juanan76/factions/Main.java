@@ -2,16 +2,12 @@ package com.juanan76.factions;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,8 +21,6 @@ import com.juanan76.factions.common.Sell;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
 import com.juanan76.factions.npc.NPC;
-import com.juanan76.factions.npc.NPCShop;
-import com.juanan76.factions.npc.SellingItem;
 import com.juanan76.factions.pvp.PvpListeners;
 import com.juanan76.factions.pvp.PvpPlayer;
 import com.juanan76.factions.pvp.Tele;
@@ -130,13 +124,6 @@ public class Main extends JavaPlugin
 				Main.factions.put(rst.getInt(1), new Faction(rst.getInt(1)));
 			// Load the 'none faction (id -1)
 				Main.factions.put(-1,new Faction(-1));
-			
-			// Load server NPCs
-			NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),32,66,13),
-					Arrays.asList(new SellingItem[] { new SellingItem(Material.SPAWNER, ChatColor.GRAY+"Lvl 1 Generator", 10000, null, Arrays.asList(new String[] {ChatColor.UNDERLINE+ChatColor.GOLD.toString()+"Respect generation:"+ChatColor.RESET+ChatColor.GOLD+" 10 respect/hour"}), true) }));
-			Main.spawnShops.add(shopGeneradores);
-			Bukkit.getPluginManager().registerEvents(shopGeneradores, this);
-			shopGeneradores.spawnEntity();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

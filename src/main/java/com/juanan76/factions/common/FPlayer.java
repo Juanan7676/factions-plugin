@@ -205,7 +205,13 @@ public class FPlayer {
 	public void openShop(Inventory i)
 	{
 		this.currShop = i;
-		this.assoc.openInventory(i);
+		final Player a = this.assoc;
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class),new Runnable() {
+			@Override
+			public void run() {
+				a.openInventory(i);
+			}
+		},1);
 	}
 	public void closeShop()
 	{
