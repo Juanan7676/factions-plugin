@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.tellraw.TellRawComponent;
@@ -114,5 +116,16 @@ public class Util {
 	public static void tellSeparator(String user)
 	{
 		Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tellraw "+user+" {\"text\":\"-----------------------------------------------\",\"color\":\"yellow\"}");
+	}
+	
+	public static boolean isFull(Inventory i)
+	{
+		ItemStack[] contents = i.getStorageContents();
+		for (ItemStack it : contents)
+		{
+			if (it == null)
+				return false;
+		}
+		return true;
 	}
 }

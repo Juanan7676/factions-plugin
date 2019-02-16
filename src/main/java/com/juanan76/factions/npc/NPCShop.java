@@ -1,12 +1,12 @@
 package com.juanan76.factions.npc;
 
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import com.juanan76.factions.common.FPlayer;
 
@@ -15,15 +15,17 @@ public class NPCShop extends NPC {
 	private String name;
 	private Location l;
 	private Map<FPlayer,Inventory> interactions;
-	private Map<ItemStack,Integer> stock;
+	private List<SellingItem> stock;
 	
 	@Override
 	public void interact(FPlayer p) {
 		Inventory i = Bukkit.createInventory(p.getPlayer(), 27);
 		
+		int c = 0;
+		for (SellingItem si : stock)
+			i.setItem(c += 2, si.getShopItem());
 		
-		
-		p.getPlayer().openInventory(i);
+		p.openShop(i);
 		this.interactions.put(p, i);
 	}
 

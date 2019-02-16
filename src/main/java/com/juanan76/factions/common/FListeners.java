@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -164,5 +165,20 @@ public class FListeners implements Listener {
 	{
 		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
 			e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onClick(InventoryClickEvent e)
+	{
+		FPlayer clicker = Main.players.get(e.getWhoClicked());
+		if (!clicker.isLogged())
+			e.setCancelled(true);
+		else
+		{
+			if (clicker.getShop()!=null)
+			{
+				
+			}
+		}
 	}
 }
