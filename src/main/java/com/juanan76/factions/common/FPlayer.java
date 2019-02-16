@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
@@ -217,11 +218,13 @@ public class FPlayer {
 		if (this.money < i.getPurchasePrice(qty))
 		{
 			this.sendMessage(PluginPart.ECONOMY, ChatColor.RED + "You don't have enough money to purchase this item!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0F, 1.0F);
 			return false;
 		}
 		else if (Util.isFull(this.assoc.getInventory()))
 		{
 			this.sendMessage(PluginPart.ECONOMY, ChatColor.RED + "You don't have enough space in your inventory to purchase this item!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0F, 1.0F);
 			return false;
 		}
 		else
@@ -229,6 +232,7 @@ public class FPlayer {
 			this.assoc.getInventory().addItem(i.getItemStack(qty));
 			this.addMoney(-i.getPurchasePrice(qty));
 			this.sendMessage(PluginPart.ECONOMY, ChatColor.GREEN + "Purchase successful!");
+			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_TRADE, 1.0F, 1.0F);
 			return true;
 		}
 	}

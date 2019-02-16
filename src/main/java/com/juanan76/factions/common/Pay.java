@@ -19,7 +19,7 @@ public class Pay implements CommandExecutor {
 			if (args.length!=2)
 				return false;
 			try {
-				FPlayer payee = FPlayer.fromNick(args[2]);
+				FPlayer payee = FPlayer.fromNick(args[0]);
 				if (payee==null)
 					Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"User not found or not online!");
 				else
@@ -33,7 +33,7 @@ public class Pay implements CommandExecutor {
 					{
 						Main.players.get(sender).addMoney(-qty);
 						payee.addMoney(qty);
-						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"Sucessfully sent "+Util.getMoney(qty)+" to "+ChatColor.YELLOW+args[2]);
+						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"Sucessfully sent "+Util.getMoney(qty)+" to "+ChatColor.YELLOW+args[0]);
 					}
 				}
 			} catch (NumberFormatException e)

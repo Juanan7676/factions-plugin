@@ -11,6 +11,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
 import com.juanan76.factions.Main;
@@ -40,6 +42,16 @@ public abstract class NPC implements Listener {
 	protected void stopInteraction(FPlayer p)
 	{
 		this.interacters.remove(p);
+	}
+	
+	protected void handleClick(InventoryClickEvent e)
+	{
+		return;
+	}
+	
+	protected void handleClose(FPlayer closer)
+	{
+		return;
 	}
 	
 	@EventHandler
@@ -86,5 +98,19 @@ public abstract class NPC implements Listener {
 		}
 	}
 	
+	@EventHandler
+	public void onClick(InventoryClickEvent e)
+	{
+		this.handleClick(e);
+	}
 	
+	@EventHandler
+	public void onClose(InventoryCloseEvent e)
+	{
+		if (this.interacters.contains(Main.players.get(e.getPlayer())))
+			this.interacters.remove(Main.players.get(e.getPlayer()));
+		
+		this.handleClose(Main.players.get(e.getPlayer()));
+		
+	}
 }
