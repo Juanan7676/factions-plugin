@@ -18,8 +18,8 @@ import com.juanan76.factions.common.FPlayer;
 
 public abstract class NPC implements Listener {
 	
-	private LivingEntity npc;
-	private Set<FPlayer> interacters;
+	protected LivingEntity npc;
+	protected Set<FPlayer> interacters;
 	
 	public abstract void interact(FPlayer p);
 	public abstract boolean isMultiple();
@@ -49,7 +49,7 @@ public abstract class NPC implements Listener {
 		{
 			if (!this.isMultiple() && this.interacters.size()>0)
 				e.setCancelled(true);
-			else
+			else if (!this.interacters.contains(Main.players.get(e.getPlayer())))
 			{
 				this.interact(Main.players.get(e.getPlayer()));
 				this.interacters.add(Main.players.get(e.getPlayer()));
