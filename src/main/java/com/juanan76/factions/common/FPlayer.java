@@ -117,7 +117,6 @@ public class FPlayer {
 		Location l = this.assoc.getLocation();
 		if ((int)Math.floor(l.getX()/16) != this.xchunk || (int)Math.floor(l.getZ()/16) != this.zchunk)
 		{
-			
 			this.xchunk = (int)Math.floor(l.getX()/16);
 			this.zchunk = (int)Math.floor(l.getZ()/16);
 			this.updateTerritory();
