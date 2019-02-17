@@ -31,7 +31,7 @@ public class Tele implements CommandExecutor {
 				String rel = fuser.getFactionObject().getRelation(Main.players.get(sender).getFactionObject());
 				if (rel.equals("a") || rel.equals("o"))
 				{
-					Teleport t = new Teleport(fuser,Main.players.get(sender));
+					Teleport t = new TeleportPlayer(fuser,Main.players.get(sender));
 					t.start();
 				}
 				else

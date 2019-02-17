@@ -26,6 +26,7 @@ public class FPlayer {
 	private int zchunk;
 	private int currTerritory;
 	private Inventory currShop;
+	private Location home;
 	
 	public static FPlayer fromID(int id)
 	{
@@ -99,6 +100,12 @@ public class FPlayer {
 			
 		}, 0, 1);
 		
+		rst = DBManager.performQuery("select * from homes where usuario="+this.playerID);
+		
+		if (rst.next())
+			this.home = new Location(Util.iconvertWorld(rst.getInt("world")),rst.getInt("x"),rst.getInt("y"),rst.getInt("z"));
+		else // User's home is spawn
+			this.home = new Location(Util.iconvertWorld(0),10,68,-6);
 		
 		Main.pvpUpdaters.put(this.assoc,id);
 	}
@@ -241,5 +248,17 @@ public class FPlayer {
 			this.assoc.playSound(this.assoc.getLocation(), Sound.ENTITY_VILLAGER_TRADE, 1.0F, 1.0F);
 			return true;
 		}
+	}
+	
+	public void updateHome(Location n) throws SQLException
+	{
+		DBManager.performExecute("delete from homes where usuario="+this.playerID);
+		DBManager.performSafeExecute("insert into homes values (?,?,?,?,?)","iiiii",this.playerID,Util.convertWorld(n.getWorld()),n.getBlockX(),n.getBlockY(),n.getBlockZ());
+		this.home = n;
+	}
+	
+	public Location getHome()
+	{
+		return this.home;
 	}
 }

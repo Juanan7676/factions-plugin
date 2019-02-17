@@ -83,8 +83,22 @@ public class Util {
 		else if (w.getName().equalsIgnoreCase("world_nether"))
 			return -1;
 		else
-			return 1;
-					
+			return 1;		
+	}
+	
+	public static World iconvertWorld(int i)
+	{
+		switch (i)
+		{
+		case 0:
+			return Bukkit.getWorld("world");
+		case -1:
+			return Bukkit.getWorld("world_nether");
+		case 1:
+			return Bukkit.getWorld("world_the_end");
+		default:
+			return null;
+		}
 	}
 	
 	public static int getTeleID()

@@ -2,6 +2,7 @@ package com.juanan76.factions.pvp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 
@@ -11,29 +12,37 @@ import com.juanan76.factions.common.PluginPart;
 import com.juanan76.factions.common.Util;
 import com.juanan76.factions.common.tellraw.TextComponent;
 
-public class Teleport {
-	private FPlayer to;
-	private FPlayer teleported;
-	private int remainingTicks;
-	private long cost;
-	private long rawCost;
-	private int rawTime;
-	private double distance;
-	private boolean amigo;
-	private boolean wilderness;
-	private boolean started;
-	private int taskID;
-	private int id;
+public abstract class Teleport {
 	
-	public Teleport(FPlayer to, FPlayer teleported)
+	protected FPlayer teleported;
+	protected int remainingTicks;
+	protected long cost;
+	protected long rawCost;
+	protected int rawTime;
+	protected double distance;
+	protected boolean amigo;
+	protected boolean wilderness;
+	protected boolean started;
+	protected int taskID;
+	protected int id;
+
+	public abstract String getLocationName();
+	
+	public abstract Location getTeleportLocation();
+	
+	public FPlayer getTeleported()
 	{
-		this.to = to;
+		return this.teleported;
+	}
+	
+	protected void config(FPlayer teleported)
+	{
 		this.teleported = teleported;
 		
-		if (!to.getPlayer().getLocation().getWorld().equals(teleported.getPlayer().getLocation().getWorld()))
+		if (!this.getTeleportLocation().getWorld().equals(teleported.getPlayer().getLocation().getWorld()))
 			this.distance = 100000000;
 		else
-			this.distance = to.getPlayer().getLocation().distanceSquared(teleported.getPlayer().getLocation());
+			this.distance = this.getTeleportLocation().distanceSquared(teleported.getPlayer().getLocation());
 		
 		this.cost = (long)Math.ceil(0.0001*this.distance);
 		this.rawCost = this.cost;
@@ -41,12 +50,6 @@ public class Teleport {
 		this.rawTime = this.remainingTicks;
 		this.amigo = false;
 		this.wilderness = false;
-		if (to.getFactionObject().getRelation(teleported.getFactionObject()).equalsIgnoreCase("a"))
-		{ // Teleporting to friendly faction: cost,time x 2
-			this.cost *= 2;
-			this.remainingTicks *= 2;
-			this.amigo = true;
-		}
 		if (teleported.getCurrTerritory()==-1)
 		{ // Teleporting from wilderness: time x 3
 			this.remainingTicks *= 3;
@@ -55,13 +58,13 @@ public class Teleport {
 		this.started = false;
 		this.taskID = 0;
 	}
-
+	
 	public void start()
 	{
 		this.started = true;
 		this.teleported.sendMessage(PluginPart.PVP, ChatColor.GREEN+"Initiating teleport:");
 		Util.tellSeparator(this.teleported.getPlayer().getName());
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Teleporting to: ","yellow"), new TextComponent(this.to.getPlayer().getName(),"green"));
+		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Teleporting to: ","yellow"), new TextComponent(this.getLocationName(),"green"));
 		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent(" "));
 		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Cost: ","red"), new TextComponent(String.format("%.2f", Math.sqrt(this.distance))+" blocks = ","yellow"),
 				new TextComponent(Util.getMoney(this.rawCost)));
@@ -83,22 +86,25 @@ public class Teleport {
 		if (this.teleported.getMoney() < this.cost)
 			this.teleported.sendMessage(PluginPart.PVP, ChatColor.RED+"Teleport failed: you don't have enough money");
 		else
-		{
-			this.started = true;
-			this.to.sendMessage(PluginPart.PVP, ChatColor.AQUA+"Warning! A friendly player is teleporting to your location..."+ChatColor.YELLOW+" (teleport time: "+this.remainingTicks/20+"s)");
-			this.id = Util.getTeleID();
-			final int id = this.id;
-			Main.teleports.put(this.id,this);
-			this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(Main.class), new Runnable() {
-				@Override
-				public void run() {
-					Main.teleports.get(id).update();
-				}
-				
-			}, 1, 1);
-		}
+			this.startTeleport();
 	}
 	
+	protected void startTeleport()
+	{
+		this.started = true;
+		//this.to.sendMessage(PluginPart.PVP, ChatColor.AQUA+"Warning! A friendly player is teleporting to your location..."+ChatColor.YELLOW+" (teleport time: "+this.remainingTicks/20+"s)");
+		this.id = Util.getTeleID();
+		final int id = this.id;
+		Main.teleports.put(this.id,this);
+		this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(Main.class), new Runnable() {
+			@Override
+			public void run() {
+				Main.teleports.get(id).update();
+			}
+			
+		}, 1, 1);
+	}
+
 	public void update()
 	{
 		if (this.started)
@@ -112,33 +118,25 @@ public class Teleport {
 			this.teleported.getPlayer().spawnParticle(Particle.PORTAL, this.teleported.getPlayer().getLocation(), 2);
 		}
 	}
-	
+
+
 	public void finish()
 	{
 		this.started = false;
 		this.teleported.addMoney(-this.cost);
-		this.teleported.getPlayer().teleport(this.to.getPlayer().getLocation());
+		this.teleported.getPlayer().teleport(this.getTeleportLocation());
 		this.teleported.getPlayer().playSound(this.teleported.getPlayer().getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 1.0F, 1.0F);
 		Bukkit.getScheduler().cancelTask(this.taskID);
 		Main.teleports.remove(this.id);
 	}
-	
+
+
 	public void cancel()
 	{
 		this.started = false;
 		this.teleported.sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Teleport cancelled.");
-		this.to.sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Teleport cancelled.");
 		Bukkit.getScheduler().cancelTask(this.taskID);
 		Main.teleports.remove(this.id);
 	}
-	
-	public FPlayer getTo()
-	{
-		return this.to;
-	}
-	
-	public FPlayer getTeleported()
-	{
-		return this.teleported;
-	}
+
 }
