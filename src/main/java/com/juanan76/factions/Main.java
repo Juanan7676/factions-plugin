@@ -21,8 +21,11 @@ import com.juanan76.factions.common.Sell;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
 import com.juanan76.factions.npc.NPC;
+import com.juanan76.factions.pvp.Home;
 import com.juanan76.factions.pvp.PvpListeners;
 import com.juanan76.factions.pvp.PvpPlayer;
+import com.juanan76.factions.pvp.Sethome;
+import com.juanan76.factions.pvp.Spawn;
 import com.juanan76.factions.pvp.Tele;
 import com.juanan76.factions.pvp.Teleport;
 
@@ -48,6 +51,9 @@ public class Main extends JavaPlugin
 		this.getCommand("tele").setExecutor(new Tele());
 		this.getCommand("pay").setExecutor(new Pay());
 		this.getCommand("sell").setExecutor(new Sell());
+		this.getCommand("spawn").setExecutor(new Spawn());
+		this.getCommand("sethome").setExecutor(new Sethome());
+		this.getCommand("home").setExecutor(new Home());
 		
 		try {
 			DBManager.performExecute("pragma foreign_keys=ON");
@@ -118,6 +124,13 @@ public class Main extends JavaPlugin
 					+ "mision integer,"
 					+ "foreign key (usuario) references miembros(usuario) on delete cascade,"
 					+ "foreign key (mision) references misiones(id) on delete cascade)");
+			DBManager.performExecute("create table if not exsits homes ("
+					+ "usuario integer primary key,"
+					+ "world integer,"
+					+ "x integer,"
+					+ "y integer,"
+					+ "z integer,"
+					+ "foreign key (usuario) references users(id) on delete cascade)");
 			// Load factions
 			ResultSet rst = DBManager.performQuery("select id from facciones");
 			while (rst.next())
