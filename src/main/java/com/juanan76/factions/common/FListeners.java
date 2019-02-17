@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,7 +21,6 @@ import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -107,8 +107,14 @@ public class FListeners implements Listener {
 		{
 			e.setCancelled(true);
 			Faction chatterFaction = Main.players.get(e.getPlayer()).getFactionObject();
-			for (FPlayer p : Main.players.values())
-				Util.tellRaw(p.getPlayer().getName(), new TextComponent("<["), new ClickableComponent(ChatColor.BOLD+chatterFaction.getShortName(p.getFactionObject())+ChatColor.RESET+"]","white",true,"View this faction's info","/f info "+chatterFaction.getID()), new TextComponent(e.getPlayer().getName()+"> "+e.getMessage()));
+			Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
+				@Override
+				public void run() {
+					for (FPlayer p : Main.players.values())
+						Util.tellRaw(p.getPlayer().getName(), new TextComponent("<["), new ClickableComponent(ChatColor.BOLD+chatterFaction.getShortName(p.getFactionObject())+ChatColor.RESET+"]","white",true,"View this faction's info","/f info "+chatterFaction.getID()), new TextComponent(e.getPlayer().getName()+"> "+e.getMessage()));
+				}
+				
+			}, 1);
 		}
 	}
 	
@@ -136,11 +142,6 @@ public class FListeners implements Listener {
 			return;
 		}
 		
-		if (e.getPlayer().isOp())
-			return;
-		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
-			e.setCancelled(true);
-		
 		if (e.getBlock().getType()==Material.SPAWNER)
 		{
 			Location l = e.getBlock().getLocation();
@@ -155,6 +156,7 @@ public class FListeners implements Listener {
 					{ // Drop spawner into world
 						l.getWorld().dropItem(l, Generator.getStack(lvl).getItemStack(1));
 					}
+					e.setExpToDrop(0);
 				} catch (SQLException ex)
 				{
 					ex.printStackTrace();
@@ -163,6 +165,11 @@ public class FListeners implements Listener {
 			}
 		}
 		
+		if (e.getPlayer().isOp())
+			return;
+		
+		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
+			e.setCancelled(true);
 		else
 		{
 			Plot p = new Plot(e.getBlock().getChunk().getX(),e.getBlock().getChunk().getZ(),Util.convertWorld(e.getBlock().getWorld()));
@@ -205,6 +212,12 @@ public class FListeners implements Listener {
 						Main.gens.put(e.getBlock().getLocation(), g);
 						g.create();
 						Main.players.get(e.getPlayer()).sendMessage(PluginPart.FACTIONS, ChatColor.GREEN+"Generator placed.");
+						CreatureSpawner sp = (CreatureSpawner)e.getBlock().getState();
+						sp.setMinSpawnDelay(80);
+						sp.setMaxSpawnDelay(120);
+						sp.setSpawnCount(1);
+						sp.setSpawnedType(EntityType.THROWN_EXP_BOTTLE);
+						sp.update();
 						} catch (SQLException ex)
 						{
 							ex.printStackTrace();
@@ -252,21 +265,6 @@ public class FListeners implements Listener {
 	}
 	
 	@EventHandler
-	public void onClick(InventoryClickEvent e)
-	{
-		FPlayer clicker = Main.players.get(e.getWhoClicked());
-		if (!clicker.isLogged())
-			e.setCancelled(true);
-		else
-		{
-			if (clicker.getShop()!=null)
-			{
-				
-			}
-		}
-	}
-	
-	@EventHandler
 	public void onLoad(ServerLoadEvent e)
 	{
 		// Load server NPCs
@@ -286,6 +284,12 @@ public class FListeners implements Listener {
 	public void onSpawner(SpawnerSpawnEvent e)
 	{
 		if (Main.gens.containsKey(e.getSpawner().getLocation()))
+		{
+			CreatureSpawner sp = e.getSpawner();
+			sp.setDelay(-1);
+			sp.update();
 			Main.gens.get(e.getSpawner().getLocation()).update();
+			e.setCancelled(true);
+		}
 	}
 }
