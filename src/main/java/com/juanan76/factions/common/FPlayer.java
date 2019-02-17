@@ -100,7 +100,7 @@ public class FPlayer {
 			
 		}, 0, 1);
 		
-		rst = DBManager.performQuery("select * from homes where id="+this.playerID);
+		rst = DBManager.performQuery("select * from homes where usuario="+this.playerID);
 		
 		if (rst.next())
 			this.home = new Location(Util.iconvertWorld(rst.getInt("world")),rst.getInt("x"),rst.getInt("y"),rst.getInt("z"));

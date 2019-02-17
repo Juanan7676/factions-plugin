@@ -22,11 +22,11 @@ commands:
         description: sell your item in hand to the server
         usage: /sell
     spawn:
-    	description: teleport to spawn
-    	usage: /spawn
+        description: teleport to spawn
+        usage: /spawn
     home:
-    	description: teleport to your home
-    	usage: /home
+        description: teleport to your home
+        usage: /home
     sethome:
-    	description: set your home at your current location
-    	usage: /sethome
+        description: set your home at your current location
+        usage: /sethome

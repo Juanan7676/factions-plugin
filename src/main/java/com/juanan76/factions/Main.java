@@ -124,7 +124,7 @@ public class Main extends JavaPlugin
 					+ "mision integer,"
 					+ "foreign key (usuario) references miembros(usuario) on delete cascade,"
 					+ "foreign key (mision) references misiones(id) on delete cascade)");
-			DBManager.performExecute("create table if not exsits homes ("
+			DBManager.performExecute("create table if not exists homes ("
 					+ "usuario integer primary key,"
 					+ "world integer,"
 					+ "x integer,"
