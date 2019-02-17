@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,8 +19,10 @@ import com.juanan76.factions.common.Login;
 import com.juanan76.factions.common.Pay;
 import com.juanan76.factions.common.Register;
 import com.juanan76.factions.common.Sell;
+import com.juanan76.factions.common.Util;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
+import com.juanan76.factions.factions.gens.Generator;
 import com.juanan76.factions.npc.NPC;
 import com.juanan76.factions.pvp.Home;
 import com.juanan76.factions.pvp.PvpListeners;
@@ -39,6 +42,7 @@ public class Main extends JavaPlugin
 	public static final Map<Integer,Faction> factions = new HashMap<Integer,Faction>();
 	public static final Map<Integer,Teleport> teleports = new HashMap<Integer,Teleport>();
 	public static final List<NPC> spawnShops = new Vector<NPC>();
+	public static final Map<Location,Generator> gens = new HashMap<Location,Generator>();
 	
 	@Override
 	public void onEnable()
@@ -131,12 +135,30 @@ public class Main extends JavaPlugin
 					+ "y integer,"
 					+ "z integer,"
 					+ "foreign key (usuario) references users(id) on delete cascade)");
+			DBManager.performExecute("create table if not exists generators ("
+					+ "faccion integer,"
+					+ "world integer,"
+					+ "x integer,"
+					+ "y integer,"
+					+ "z integer,"
+					+ "lvl integer,"
+					+ "progress integer,"
+					+ "primary key (world,x,y,z),"
+					+ "foreign key (faccion) references facciones(id) on delete cascade)");
 			// Load factions
 			ResultSet rst = DBManager.performQuery("select id from facciones");
 			while (rst.next())
 				Main.factions.put(rst.getInt(1), new Faction(rst.getInt(1)));
 			// Load the 'none faction (id -1)
 				Main.factions.put(-1,new Faction(-1));
+			
+			// Load generators
+			rst = DBManager.performQuery("select * from generators");
+			while (rst.next())
+			{
+				Location l = new Location(Util.iconvertWorld(rst.getInt("world")),rst.getInt("x"),rst.getInt("y"),rst.getInt("z"));
+				Main.gens.put(l, new Generator(Main.factions.get(rst.getInt("faccion")), l, rst.getInt("lvl"), rst.getInt("progress")));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -147,6 +169,9 @@ public class Main extends JavaPlugin
 	public void onDisable()
 	{
 		try {
+			// Save generators
+			for (Generator g : Main.gens.values())
+				g.save();
 			DBManager.closeConnection();
 		} catch (SQLException e) {
 			e.printStackTrace();

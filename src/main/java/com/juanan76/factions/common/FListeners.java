@@ -3,8 +3,6 @@ package com.juanan76.factions.common;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -21,18 +19,21 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.server.ServerLoadEvent;
+import org.bukkit.inventory.ItemStack;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.tellraw.ClickableComponent;
 import com.juanan76.factions.common.tellraw.TextComponent;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.Plot;
+import com.juanan76.factions.factions.gens.Generator;
 import com.juanan76.factions.npc.NPC;
 import com.juanan76.factions.npc.NPCShop;
 import com.juanan76.factions.npc.SellingItem;
@@ -129,10 +130,39 @@ public class FListeners implements Listener {
 	@EventHandler
 	public void onBreak(BlockBreakEvent e)
 	{
+		if (!Main.players.get(e.getPlayer()).isLogged())
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
 		if (e.getPlayer().isOp())
 			return;
 		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
 			e.setCancelled(true);
+		
+		if (e.getBlock().getType()==Material.SPAWNER)
+		{
+			Location l = e.getBlock().getLocation();
+			if (Main.gens.containsKey(l))
+			{
+				try {
+					Generator g = Main.gens.get(l);
+					int lvl = g.getLvl();
+					g.delete();
+					Main.gens.remove(l);
+					if (e.getPlayer().getInventory().getItemInMainHand().containsEnchantment(Enchantment.SILK_TOUCH))
+					{ // Drop spawner into world
+						l.getWorld().dropItem(l, Generator.getStack(lvl).getItemStack(1));
+					}
+				} catch (SQLException ex)
+				{
+					ex.printStackTrace();
+				}
+				
+			}
+		}
+		
 		else
 		{
 			Plot p = new Plot(e.getBlock().getChunk().getX(),e.getBlock().getChunk().getZ(),Util.convertWorld(e.getBlock().getWorld()));
@@ -150,8 +180,52 @@ public class FListeners implements Listener {
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e)
 	{
+		if (!Main.players.get(e.getPlayer()).isLogged())
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
 		if (e.getBlock().getType()==Material.COMMAND_BLOCK)
 			e.getPlayer().sendMessage(e.getPlayer().getLocation().getWorld().getName());
+		
+		if (e.getBlock().getType()==Material.SPAWNER)
+		{
+			ItemStack i = e.getItemInHand();
+			if (i.containsEnchantment(Enchantment.ARROW_INFINITE))
+			{
+				Plot p = new Plot(e.getBlock().getChunk().getX(),e.getBlock().getChunk().getZ(),Util.convertWorld(e.getBlock().getWorld()));
+				if (p.getFaction()!=-1)
+				{
+					if (p.getFaction()==Main.players.get(e.getPlayer()).getFaction())
+					{
+						try {
+						int lvl = i.getEnchantmentLevel(Enchantment.ARROW_INFINITE);
+						Generator g = new Generator(Main.players.get(e.getPlayer()).getFactionObject(), e.getBlock().getLocation(), lvl);
+						Main.gens.put(e.getBlock().getLocation(), g);
+						g.create();
+						Main.players.get(e.getPlayer()).sendMessage(PluginPart.FACTIONS, ChatColor.GREEN+"Generator placed.");
+						} catch (SQLException ex)
+						{
+							ex.printStackTrace();
+						}
+					}
+					else
+					{
+						Main.players.get(e.getPlayer()).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"You can't place respect generators on a territory claimed by another faction!");
+						e.setCancelled(true);
+						return;
+					}
+				}
+				else
+				{
+					Main.players.get(e.getPlayer()).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"You can't place respect generators on wilderness!");
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+		
 		if (e.getPlayer().isOp())
 			return;
 		if (Math.abs(e.getBlock().getLocation().getX()) <= 100 && Math.abs(e.getBlock().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlock().getWorld())==0) // Trying to break spawn
@@ -199,14 +273,19 @@ public class FListeners implements Listener {
 		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
 			@Override
 			public void run() {
-				Map<Enchantment,Integer> lvl = new HashMap<Enchantment,Integer>();
-				lvl.put(Enchantment.ARROW_INFINITE, 1);
 				NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),32,66,13),
-					Arrays.asList(new SellingItem[] { new SellingItem(Material.SPAWNER, ChatColor.GRAY+ChatColor.BOLD.toString() + "Lvl 1 Generator", 10000, lvl, Arrays.asList(new String[] {"",ChatColor.GOLD.toString()+ChatColor.UNDERLINE+"Respect generation:"+ChatColor.RESET+ChatColor.GOLD+" 10 respect/hour"}), true) }));
+					Arrays.asList(new SellingItem[] { Generator.getStack(1),Generator.getStack(2),Generator.getStack(3),Generator.getStack(4),Generator.getStack(5),Generator.getStack(6),Generator.getStack(7),Generator.getStack(8),Generator.getStack(9),Generator.getStack(10) }));
 				Main.spawnShops.add(shopGeneradores);
 				Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
 				shopGeneradores.spawnEntity();
 			}
 		},1);
+	}
+	
+	@EventHandler
+	public void onSpawner(SpawnerSpawnEvent e)
+	{
+		if (Main.gens.containsKey(e.getSpawner().getLocation()))
+			Main.gens.get(e.getSpawner().getLocation()).update();
 	}
 }
