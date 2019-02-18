@@ -34,6 +34,7 @@ public class Pay implements CommandExecutor {
 						Main.players.get(sender).addMoney(-qty);
 						payee.addMoney(qty);
 						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"Sucessfully sent "+Util.getMoney(qty)+" to "+ChatColor.YELLOW+args[0]);
+						payee.sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"You received "+Util.getMoney(qty)+" from "+ChatColor.YELLOW+sender.getName());
 					}
 				}
 			} catch (NumberFormatException e)

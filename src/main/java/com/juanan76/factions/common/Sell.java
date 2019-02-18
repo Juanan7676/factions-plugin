@@ -19,6 +19,7 @@ public class Sell implements CommandExecutor {
 	public Sell()
 	{
 		this.serverPrices.put(Material.COBBLESTONE, 1L);
+		this.serverPrices.put(Material.STONE, 1L);
 		this.serverPrices.put(Material.OAK_PLANKS, 2L);
 		this.serverPrices.put(Material.ACACIA_PLANKS, 2L);
 		this.serverPrices.put(Material.BIRCH_PLANKS, 2L);
@@ -35,8 +36,17 @@ public class Sell implements CommandExecutor {
 		this.serverPrices.put(Material.IRON_INGOT, 5L);
 		this.serverPrices.put(Material.GOLD_INGOT, 11L);
 		this.serverPrices.put(Material.LAPIS_LAZULI, 12L);
+		this.serverPrices.put(Material.REDSTONE,7L);
+		this.serverPrices.put(Material.QUARTZ,10L);
+		this.serverPrices.put(Material.ROTTEN_FLESH,2L);
+		this.serverPrices.put(Material.GUNPOWDER, 2L);
+		this.serverPrices.put(Material.SPIDER_EYE, 2L);
+		this.serverPrices.put(Material.BONE, 2L);
+		this.serverPrices.put(Material.ARROW, 2L);
+		this.serverPrices.put(Material.ENDER_PEARL, 2L);
+		this.serverPrices.put(Material.OBSIDIAN,6L);
 		this.serverPrices.put(Material.DIAMOND, 20L);
-		this.serverPrices.put(Material.CACTUS, 9L);
+		this.serverPrices.put(Material.CACTUS, 5L);
 		this.serverPrices.put(Material.SUGAR_CANE, 5L);
 		this.serverPrices.put(Material.BREAD, 6L);
 		this.serverPrices.put(Material.WHEAT, 2L);
@@ -45,7 +55,7 @@ public class Sell implements CommandExecutor {
 		this.serverPrices.put(Material.MELON, 1L);
 		this.serverPrices.put(Material.PUMPKIN, 2L);
 		this.serverPrices.put(Material.WITHER_SKELETON_SKULL, 100L);
-		this.serverPrices.put(Material.BLAZE_ROD, 7L);
+		this.serverPrices.put(Material.BLAZE_ROD, 3L);
 	}
 
 	@Override
