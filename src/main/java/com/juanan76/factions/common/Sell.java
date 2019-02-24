@@ -8,10 +8,12 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.juanan76.factions.Main;
+import com.juanan76.factions.factions.gens.Generator;
 
 public class Sell implements CommandExecutor {
 	public Map<Material,Long> serverPrices = new HashMap<Material,Long>();
@@ -65,6 +67,20 @@ public class Sell implements CommandExecutor {
 			ItemStack it = ((Player) sender).getInventory().getItemInMainHand();
 			if (it != null)
 			{
+				if (it.getType()==Material.SPAWNER)
+				{
+					if (it.getEnchantmentLevel(Enchantment.ARROW_INFINITE)>0)
+					{
+						((Player) sender).getInventory().setItemInMainHand(null);
+						long aw = (long)Math.floor(Generator.getStack(it.getEnchantmentLevel(Enchantment.ARROW_INFINITE)).getPurchasePrice(it.getAmount())*0.9);
+						Main.players.get(sender).addMoney(aw);
+						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"You got "+Util.getMoney(aw)+"!");
+					}
+					else
+					{
+						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"That item can't be sold to the server.");
+					}
+				}
 				if (!this.serverPrices.containsKey(it.getType()))
 					Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"That item can't be sold to the server.");
 				else
