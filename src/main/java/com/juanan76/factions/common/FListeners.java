@@ -22,6 +22,8 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -291,5 +293,19 @@ public class FListeners implements Listener {
 			Main.gens.get(e.getSpawner().getLocation()).update();
 			e.setCancelled(true);
 		}
+	}
+	
+	@EventHandler
+	public void onBucket(PlayerBucketEmptyEvent e)
+	{
+		if (Math.abs(e.getBlockClicked().getLocation().getX()) <= 100 && Math.abs(e.getBlockClicked().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlockClicked().getWorld())==0) // Trying to break spawn
+			e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onBucket(PlayerBucketFillEvent e)
+	{
+		if (Math.abs(e.getBlockClicked().getLocation().getX()) <= 100 && Math.abs(e.getBlockClicked().getLocation().getZ()) <= 100 && Util.convertWorld(e.getBlockClicked().getWorld())==0) // Trying to break spawn
+			e.setCancelled(true);
 	}
 }

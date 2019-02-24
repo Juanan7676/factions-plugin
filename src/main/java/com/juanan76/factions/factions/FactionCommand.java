@@ -2,6 +2,9 @@ package com.juanan76.factions.factions;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -376,8 +379,22 @@ public class FactionCommand implements CommandExecutor {
 				Main.players.get(sender).sendMessage(PluginPart.FACTIONS, "Here's a list with the top 20 factions with more respect on the server:");
 				Util.tellSeparator(sender.getName());
 				int cont = 0;
-				for (Faction f : Main.factions.values())
-					Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new ClickableComponent(f.getRawName(),"yellow",false,"View this faction's info","/f info "+f.getID()));
+				List<Faction> lista = new ArrayList<Faction>(Main.factions.values());
+				Collections.sort(lista, new Comparator<Faction>() {
+					@Override
+					public int compare(Faction o1, Faction o2) {
+						long diff = o1.getRespect() - o2.getRespect();
+						if (diff > 0)
+							return 1;
+						else if (diff == 0)
+							return 0;
+						else
+							return -1;
+					}
+				});
+				for (Faction f : lista)
+					if (f.getID()!=-1)
+					Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new ClickableComponent(f.getRawName(),"green",true,"View this faction's info","/f info "+f.getID()), new TextComponent(" ("+f.getRespect()+")","green"));
 				Util.tellSeparator(sender.getName());
 			}
 			else
