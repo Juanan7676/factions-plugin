@@ -237,7 +237,7 @@ public class FactionCommand implements CommandExecutor {
 						else
 						{
 							if (!kick && rst.getInt(1)!=Main.players.get(sender).getID()) 
-								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), (tp) ? new TextComponent(" [") : null, (tp) ? new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)) : null, (tp) ? new TextComponent("])") : null);
+								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), (tp) ? new TextComponent(" [") : null, (tp) ? new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)) : null, (tp) ? new TextComponent("]") : null, new TextComponent(")"));
 							else
 								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), new TextComponent(" ["), new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)), new TextComponent("]) ["),new ClickableComponent("KICK","red",true,"Kick this player from faction","/f k "+rst.getInt(1)), new TextComponent("]"));
 						}
@@ -400,7 +400,7 @@ public class FactionCommand implements CommandExecutor {
 				List<Faction> lista = new ArrayList<Faction>(Main.factions.values());
 				Collections.sort(lista, new Comparator<Faction>() {
 					@Override
-					public int compare(Faction o1, Faction o2) {
+					public int compare(Faction o2, Faction o1) {
 						long diff = o1.getRespect() - o2.getRespect();
 						if (diff > 0)
 							return 1;
