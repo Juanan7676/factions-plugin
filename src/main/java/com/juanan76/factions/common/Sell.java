@@ -22,6 +22,7 @@ public class Sell implements CommandExecutor {
 	{
 		this.serverPrices.put(Material.COBBLESTONE, 1L);
 		this.serverPrices.put(Material.STONE, 1L);
+		this.serverPrices.put(Material.NETHERRACK, 1L);
 		this.serverPrices.put(Material.OAK_PLANKS, 2L);
 		this.serverPrices.put(Material.ACACIA_PLANKS, 2L);
 		this.serverPrices.put(Material.BIRCH_PLANKS, 2L);
@@ -54,10 +55,12 @@ public class Sell implements CommandExecutor {
 		this.serverPrices.put(Material.WHEAT, 2L);
 		this.serverPrices.put(Material.CARROT, 2L);
 		this.serverPrices.put(Material.POTATO, 2L);
-		this.serverPrices.put(Material.MELON, 1L);
+		this.serverPrices.put(Material.MELON_SLICE, 1L);
 		this.serverPrices.put(Material.PUMPKIN, 2L);
 		this.serverPrices.put(Material.WITHER_SKELETON_SKULL, 100L);
-		this.serverPrices.put(Material.BLAZE_ROD, 3L);
+		this.serverPrices.put(Material.BLAZE_ROD, 7L);
+		this.serverPrices.put(Material.STRING, 2L);
+		this.serverPrices.put(Material.WHITE_WOOL, 1L);
 	}
 
 	@Override
@@ -75,6 +78,7 @@ public class Sell implements CommandExecutor {
 						long aw = (long)Math.floor(Generator.getStack(it.getEnchantmentLevel(Enchantment.ARROW_INFINITE)).getPurchasePrice(it.getAmount())*0.9);
 						Main.players.get(sender).addMoney(aw);
 						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"You got "+Util.getMoney(aw)+"!");
+						return true;
 					}
 					else
 						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"That item can't be sold to the server.");

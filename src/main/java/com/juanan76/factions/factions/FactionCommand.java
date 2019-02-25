@@ -212,44 +212,42 @@ public class FactionCommand implements CommandExecutor {
 			}
 			else if (args[0].equalsIgnoreCase("list"))
 			{
-				int f = Main.players.get(sender).getFaction();
-				if (f==-1)
-					Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"You're not in a faction!");
-				else
-				{
-					ResultSet rst;
-					try {
-						rst = DBManager.performQuery("select * from facciones where lider="+Main.players.get(sender).getID());
+				int f = Integer.parseInt(args[1]);
+				ResultSet rst;
+				try {
+					rst = DBManager.performQuery("select * from facciones where lider="+Main.players.get(sender).getID()+" and id="+f);
 						
-						boolean kick = rst.next();
+					boolean kick = rst.next();
+					boolean tp = Main.players.get(sender).getFaction()==f;
 						
-						Main.players.get(sender).sendMessage(PluginPart.FACTIONS, "Here's a list of the members of your faction: \n");
-						rst = DBManager.performQuery("select usuario,rango from miembros where miembros.faccion="+f);
-						int cont = 0;
-						Util.tellSeparator(sender.getName());
-						while (rst.next())
+					Main.players.get(sender).sendMessage(PluginPart.FACTIONS, "Here's a list of the members of your faction: \n");
+					rst = DBManager.performQuery("select usuario,rango from miembros where miembros.faccion="+f);
+					int cont = 0;
+					Util.tellSeparator(sender.getName());
+					while (rst.next())
+					{
+						String color = (rst.getInt(2)==-1) ? "yellow":"white";
+						if (FPlayer.fromID(rst.getInt(1))==null)
 						{
-							String color = (rst.getInt(2)==-1) ? "yellow":"white";
-							if (FPlayer.fromID(rst.getInt(1))==null)
-							{
-								if (!kick || rst.getInt(1)==Main.players.get(sender).getID()) 
-									Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Offline","red"), new TextComponent(")"));
-								else
-									Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Offline","red"), new TextComponent(") ["), new ClickableComponent("KICK","red",true,"Kick this player from faction","/f k "+rst.getInt(1)), new TextComponent("]"));
-							}
+							if (!kick || rst.getInt(1)==Main.players.get(sender).getID()) 
+								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Offline","red"), new TextComponent(")"));
 							else
-							{
-								if (!kick && rst.getInt(1)!=Main.players.get(sender).getID()) 
-									Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), new TextComponent(" ["), new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)), new TextComponent("])"));
-								else
-									Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), new TextComponent(" ["), new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)), new TextComponent("]) ["),new ClickableComponent("KICK","red",true,"Kick this player from faction","/f k "+rst.getInt(1)), new TextComponent("]"));
-							}
-								
+								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Offline","red"), new TextComponent(") ["), new ClickableComponent("KICK","red",true,"Kick this player from faction","/f k "+rst.getInt(1)), new TextComponent("]"));
 						}
-						Util.tellSeparator(sender.getName());
-					} catch (SQLException e) {
-						e.printStackTrace();
+						else
+						{
+							if (!kick && rst.getInt(1)!=Main.players.get(sender).getID()) 
+								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), (tp) ? new TextComponent(" [") : null, (tp) ? new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)) : null, (tp) ? new TextComponent("])") : null);
+							else
+								Util.tellRaw(sender.getName(), new TextComponent((++cont)+". ","white",true), new TextComponent(FPlayer.nickfromID(rst.getInt(1))+" ",color,true), new TextComponent("("), new TextComponent("Online ","green"), new TextComponent(" ["), new ClickableComponent("TP","green",true,"Initiate a teleport to this player","/tele "+rst.getInt(1)), new TextComponent("]) ["),new ClickableComponent("KICK","red",true,"Kick this player from faction","/f k "+rst.getInt(1)), new TextComponent("]"));
+						}
 					}
+					Util.tellSeparator(sender.getName());
+				} catch (SQLException e) {
+					e.printStackTrace();
+				} catch (NumberFormatException e)
+				{
+					Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Malformed command!");
 				}
 			}
 			else if (args[0].equalsIgnoreCase("k"))
@@ -340,6 +338,7 @@ public class FactionCommand implements CommandExecutor {
 							if (!fact.isMember(Main.players.get(sender).getID()))
 								Util.tellRaw(user, new TextComponent("► ["),new ClickableComponent("APPLY","green",true,"Send an application to this faction","/f j "+fact.getRawName()),
 										new TextComponent("]"));
+							Util.tellRaw(user, new TextComponent("► [","red"), new ClickableComponent("View member list","gold",false,"View this faction's members","/f list "+fact.getID()), new TextComponent("]","red"));
 							Util.tellSeparator(user);
 						}
 					}
