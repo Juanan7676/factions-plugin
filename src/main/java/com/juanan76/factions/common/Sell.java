@@ -77,9 +77,7 @@ public class Sell implements CommandExecutor {
 						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"You got "+Util.getMoney(aw)+"!");
 					}
 					else
-					{
 						Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"That item can't be sold to the server.");
-					}
 				}
 				if (!this.serverPrices.containsKey(it.getType()))
 					Main.players.get(sender).sendMessage(PluginPart.ECONOMY, ChatColor.RED+"That item can't be sold to the server.");

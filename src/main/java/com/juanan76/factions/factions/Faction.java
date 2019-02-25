@@ -104,19 +104,14 @@ public class Faction {
 			this.claimedChunks.add(new Plot(x,z,world,this.name,desc,this.id));
 	}
 	
-	public void unclaimChunk(int x, int z)
+	public void unclaimChunk(int x, int z) throws SQLException
 	{
 		for (Plot p : this.claimedChunks)
 		{
 			if (p.getX()==x && p.getZ()==z)
 			{
-				try {
-					p.remove();
-					this.claimedChunks.remove(p);
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				
+				p.remove();
+				this.claimedChunks.remove(p);
 			}
 		}
 	}

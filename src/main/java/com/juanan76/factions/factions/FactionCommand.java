@@ -374,6 +374,25 @@ public class FactionCommand implements CommandExecutor {
 						Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Could not claim chunk! Is it too close to spawn, is it claimed by another faction or has your faction enough respect? (Required respect to claim another chunk: "+ChatColor.YELLOW+(f.getNPlots()*f.getNPlots()*f.getNPlots()*f.getNPlots())+ChatColor.RED+")");
 				}
 			}
+			else if (args[0].equalsIgnoreCase("unclaim"))
+			{
+				if (Main.players.get(sender).getFaction()==-1)
+					Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"You're not in a faction!");
+				else
+				{
+					Faction f = Main.players.get(sender).getFactionObject();
+					Plot p = new Plot(Main.players.get(sender).getChunkX(), Main.players.get(sender).getChunkZ(),Util.convertWorld(((Player) sender).getWorld()));
+					if (p.getFaction()==f.getID())
+						try {
+							f.unclaimChunk(p.getX(), p.getZ());
+							Main.players.get(sender).updateTerritory();
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
+					else
+						Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"You can only unclaim chunks that belong to your faction!");
+				}
+			}
 			else if (args[0].equalsIgnoreCase("factions"))
 			{
 				Main.players.get(sender).sendMessage(PluginPart.FACTIONS, "Here's a list with the top 20 factions with more respect on the server:");

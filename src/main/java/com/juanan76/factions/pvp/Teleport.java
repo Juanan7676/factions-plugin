@@ -99,7 +99,10 @@ public abstract class Teleport {
 		this.taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(Main.class), new Runnable() {
 			@Override
 			public void run() {
-				Main.teleports.get(id).update();
+				if (Main.teleports.containsKey(id))
+					Main.teleports.get(id).update();
+				else
+					Bukkit.getScheduler().cancelTask(id);
 			}
 			
 		}, 1, 1);

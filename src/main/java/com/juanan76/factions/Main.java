@@ -9,9 +9,13 @@ import java.util.Vector;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.juanan76.factions.common.BossInfo;
 import com.juanan76.factions.common.DBManager;
 import com.juanan76.factions.common.FListeners;
 import com.juanan76.factions.common.FPlayer;
@@ -43,6 +47,7 @@ public class Main extends JavaPlugin
 	public static final Map<Integer,Teleport> teleports = new HashMap<Integer,Teleport>();
 	public static final List<NPC> spawnShops = new Vector<NPC>();
 	public static final Map<Location,Generator> gens = new HashMap<Location,Generator>();
+	public static final BossBar info = Bukkit.createBossBar("", BarColor.PURPLE , BarStyle.SOLID);
 	
 	@Override
 	public void onEnable()
@@ -58,6 +63,8 @@ public class Main extends JavaPlugin
 		this.getCommand("spawn").setExecutor(new Spawn());
 		this.getCommand("sethome").setExecutor(new Sethome());
 		this.getCommand("home").setExecutor(new Home());
+		
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new BossInfo(), 1, 1);
 		
 		try {
 			DBManager.performExecute("pragma foreign_keys=ON");

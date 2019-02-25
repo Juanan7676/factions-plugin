@@ -108,6 +108,7 @@ public class FPlayer {
 			this.home = new Location(Util.iconvertWorld(0),10,68,-6);
 		
 		Main.pvpUpdaters.put(this.assoc,id);
+		Main.info.addPlayer(this.assoc);
 	}
 	/**
 	 * Call this every time a player moves.
