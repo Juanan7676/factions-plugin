@@ -1,9 +1,8 @@
 package com.juanan76.factions.common.menu;
 
-import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,10 +14,20 @@ import com.juanan76.factions.common.FPlayer;
 public abstract class Menu implements Listener {
 	
 	private int size;
-	private FPlayer viewer;
+	protected FPlayer viewer;
 	private Inventory view;
+	private boolean closed;
 	
-	protected List<MenuItem> contents;
+	protected Map<Integer,MenuItem> contents;
+	
+	public Menu(FPlayer viewer, int size)
+	{
+		this.viewer = viewer;
+		this.size = size;
+		this.closed = false;
+	}
+	
+	public abstract void initContents();
 	
 	@EventHandler
 	public void onClick(InventoryClickEvent e)
@@ -28,36 +37,41 @@ public abstract class Menu implements Listener {
 			int slot = e.getSlot();
 			e.setCancelled(true);
 			boolean flag = false;
-			for (MenuItem i : this.contents)
-				if(i.getSlot()==slot)
-					flag = i.handleClick();
+			if (this.contents.containsKey(slot))
+				this.contents.get(slot).handleClick();
 			
 			if (flag)
 			{
-				final Player p = viewer.getPlayer();
-				Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable () {
-
-					@Override
-					public void run() {
-						p.closeInventory();
-					}
-					
-				},1);
+				this.viewer.closeMenu();
+				this.closed = true;
 			}
 		}
 	}
 	
 	public void composeInv()
 	{
-		this.view = Bukkit.createInventory(viewer.getPlayer(), size);
-		for (MenuItem i : this.contents)
-			this.view.setItem(i.getSlot(), i.getItem());
-			
+		if (this.view == null)
+			this.view = Bukkit.createInventory(viewer.getPlayer(), size);
+		
+		this.view.clear();
+		for (int s : this.contents.keySet())
+			this.view.setItem(s,this.contents.get(s).getItem());
 	}
 	
 	public Inventory getInv()
 	{
 		return this.view;
+	}
+	
+	public boolean isClosed()
+	{
+		return this.closed;
+	}
+	
+	public void swapMenu(Menu another)
+	{
+		this.viewer.openMenu(another);
+		this.closed = true;
 	}
 
 }

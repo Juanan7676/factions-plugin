@@ -5,15 +5,12 @@ import org.bukkit.inventory.ItemStack;
 public abstract class MenuItem {
 	
 	protected Menu menu;
-	protected int slot;
+	protected ItemStack repr;
 	
-	protected MenuItem(Menu m)
+	protected MenuItem(Menu m, ItemStack repr)
 	{
 		this.menu = m;
-	}
-	
-	public int getSlot() {
-		return this.slot;
+		this.repr = repr;
 	}
 	
 	/**
@@ -22,5 +19,7 @@ public abstract class MenuItem {
 	 */
 	public abstract boolean handleClick();
 	
-	public abstract ItemStack getItem();
+	public ItemStack getItem() {
+		return this.repr;
+	}
 }

@@ -1,29 +1,21 @@
 package com.juanan76.factions.common.menu;
 
-import java.util.List;
-
 import org.bukkit.inventory.ItemStack;
 
 public class ItemSwapMenu extends MenuItem {
 	
-	private List<MenuItem> toSwap;
+	private Menu toSwap;
 	
-	public ItemSwapMenu(Menu m, List<MenuItem> swap)
+	public ItemSwapMenu(Menu m, ItemStack repr, Menu swap)
 	{
-		super(m);
+		super(m,repr);
 		this.toSwap = swap;
 	}
 	
 	@Override
 	public boolean handleClick() {
-		super.menu.contents = toSwap;
+		super.menu.swapMenu(this.toSwap);
 		return false;
-	}
-
-	@Override
-	public ItemStack getItem() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }

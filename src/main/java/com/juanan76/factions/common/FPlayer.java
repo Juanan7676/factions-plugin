@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 import com.juanan76.factions.Main;
+import com.juanan76.factions.common.menu.Menu;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.Plot;
 import com.juanan76.factions.npc.SellingItem;
@@ -260,5 +261,24 @@ public class FPlayer {
 	public Location getHome()
 	{
 		return this.home;
+	}
+	
+	public void openMenu(Menu m)
+	{
+		m.composeInv();
+		this.assoc.openInventory(m.getInv());
+	}
+	
+	public void closeMenu()
+	{
+		Player p = this.assoc;
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable () {
+
+			@Override
+			public void run() {
+				p.closeInventory();
+			}
+			
+		},1);
 	}
 }
