@@ -29,6 +29,9 @@ public abstract class Menu implements Listener {
 	
 	public abstract void initContents();
 	
+	public void onSwap(Menu m) { };
+	public void onClose() { };
+	
 	@EventHandler
 	public void onClick(InventoryClickEvent e)
 	{
@@ -44,6 +47,7 @@ public abstract class Menu implements Listener {
 			{
 				this.viewer.closeMenu();
 				this.closed = true;
+				this.onClose();
 			}
 		}
 	}
@@ -72,6 +76,7 @@ public abstract class Menu implements Listener {
 	{
 		this.viewer.openMenu(another);
 		this.closed = true;
+		this.onSwap(another);
 	}
 
 }

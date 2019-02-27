@@ -28,6 +28,7 @@ public class FPlayer {
 	private int currTerritory;
 	private Inventory currShop;
 	private Location home;
+	private Menu currMenu;
 	
 	public static FPlayer fromID(int id)
 	{
@@ -265,6 +266,7 @@ public class FPlayer {
 	
 	public void openMenu(Menu m)
 	{
+		this.currMenu = m;
 		m.composeInv();
 		this.assoc.openInventory(m.getInv());
 	}
@@ -272,6 +274,7 @@ public class FPlayer {
 	public void closeMenu()
 	{
 		Player p = this.assoc;
+		this.currMenu = null;
 		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable () {
 
 			@Override
@@ -280,5 +283,10 @@ public class FPlayer {
 			}
 			
 		},1);
+	}
+	
+	public Menu getMenu()
+	{
+		return this.currMenu;
 	}
 }
