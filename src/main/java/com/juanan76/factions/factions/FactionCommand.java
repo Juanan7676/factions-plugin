@@ -375,7 +375,7 @@ public class FactionCommand implements CommandExecutor {
 							e.printStackTrace();
 						}
 					else
-						Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Could not claim chunk! Is it too close to spawn, is it claimed by another faction or has your faction enough respect? (Required respect to claim another chunk: "+ChatColor.YELLOW+(f.getNPlots()*f.getNPlots()*f.getNPlots()*f.getNPlots())+ChatColor.RED+")");
+						Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Could not claim chunk! Is it too close to spawn, is it claimed by another faction or has your faction enough respect? (Required respect to claim another chunk: "+ChatColor.YELLOW+(f.getNPlots()*f.getNPlots()*f.getNPlots())+ChatColor.RED+")");
 				}
 			}
 			else if (args[0].equalsIgnoreCase("unclaim"))
