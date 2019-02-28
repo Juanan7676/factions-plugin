@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -47,6 +48,15 @@ public class PvpListeners implements Listener {
 				Main.pvp.get((Player)e.getDamager()).engageFight();
 			}
 		}
+		else if (e.getEntity().getType() == EntityType.PLAYER && e.getDamager().getType()==EntityType.ARROW)
+		{
+			Arrow a = (Arrow)e.getDamager();
+			if (a.getShooter() instanceof Player)
+			{
+				Main.pvp.get((Player)e.getEntity()).engageFight();
+				Main.pvp.get((Player)a.getShooter()).engageFight();
+			}
+		}
 		else if (e.getEntity().getType() == EntityType.ITEM_FRAME && e.getEntity().getLocation().distanceSquared(new Location(e.getEntity().getLocation().getWorld(),0,0,0)) <= 40000 && Util.convertWorld(e.getEntity().getLocation().getWorld())==0)
 			e.setCancelled(true);
 	}
@@ -80,6 +90,7 @@ public class PvpListeners implements Listener {
 		{
 			Player killer = e.getEntity().getKiller();
 			Player killed = (Player)e.getEntity();
+			Main.pvp.get(killed).disengageFight();
 			if (Main.players.get(killer).getFactionObject().getID()!=-1)
 			{
 				Faction kFaction = Main.players.get(killed).getFactionObject();

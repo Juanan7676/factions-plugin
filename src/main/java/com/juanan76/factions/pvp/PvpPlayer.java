@@ -29,7 +29,7 @@ public class PvpPlayer {
 	public void disengageFight()
 	{
 		this.onFight = false;
-		Main.players.get(assoc).sendMessage(PluginPart.PVP, ChatColor.GREEN+"You're no longer in combat! You may now log out.");
+		if (this.assoc.getHealth()>0) Main.players.get(assoc).sendMessage(PluginPart.PVP, ChatColor.GREEN+"You're no longer in combat! You may now log out.");
 	}
 	
 	public void update()
