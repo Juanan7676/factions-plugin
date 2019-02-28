@@ -69,6 +69,7 @@ public class FactionCommand implements CommandExecutor {
 								DBManager.performSafeExecute("insert into facciones values (?,?,?,0,0,?)", "issi", id,args[1],args[2].toUpperCase(),Main.players.get(sender).getID());
 								new Plot(p.getX(),p.getZ(),Util.convertWorld(((Player) sender).getWorld()),args[1],desc,id);
 								DBManager.performSafeExecute("insert into miembros values (?,?,-1,0)","ii",Main.players.get(sender).getID(),id);
+								Main.players.get(sender).addMoney(-price);
 								Main.factions.put(id, new Faction(id));
 								Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.GREEN+"Faction succesfully created!");
 								Main.players.get(sender).updateMap();
