@@ -6,6 +6,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 
 import com.juanan76.factions.Main;
@@ -49,6 +51,28 @@ public abstract class Menu implements Listener {
 				this.closed = true;
 				this.onClose();
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onClose(InventoryCloseEvent e)
+	{
+		if (Main.players.get(e.getPlayer()).isLogged() && e.getInventory().equals(view))
+		{
+			this.closed = true;
+			this.viewer.closeMenu();
+			this.onClose();
+		}
+	}
+	
+	@EventHandler
+	public void onQuit(PlayerQuitEvent e)
+	{
+		if (e.getPlayer().equals(this.viewer.getPlayer()))
+		{
+			this.closed = true;
+			this.viewer.closeMenu();
+			this.onClose();
 		}
 	}
 	
