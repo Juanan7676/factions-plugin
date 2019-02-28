@@ -17,8 +17,8 @@ public abstract class Menu implements Listener {
 	
 	private int size;
 	protected FPlayer viewer;
-	private Inventory view;
-	private boolean closed;
+	protected Inventory view;
+	protected boolean closed;
 	
 	protected Map<Integer,MenuItem> contents;
 	
@@ -34,10 +34,12 @@ public abstract class Menu implements Listener {
 	public void onSwap(Menu m) { };
 	public void onClose() { };
 	
+	protected void onEvent(String id, Object... args) { };
+	
 	@EventHandler
 	public void onClick(InventoryClickEvent e)
 	{
-		if (Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(view))
+		if (Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(view) && e.getRawSlot() < e.getInventory().getSize())
 		{
 			int slot = e.getSlot();
 			e.setCancelled(true);

@@ -8,6 +8,7 @@ import java.util.Vector;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -18,6 +19,7 @@ import com.juanan76.factions.common.Util;
 import com.juanan76.factions.common.menu.ItemDummy;
 import com.juanan76.factions.common.menu.ItemExitMenu;
 import com.juanan76.factions.common.menu.ItemSwapMenu;
+import com.juanan76.factions.common.menu.ItemTriggerEvent;
 import com.juanan76.factions.common.menu.Menu;
 import com.juanan76.factions.common.menu.MenuItem;
 
@@ -53,20 +55,6 @@ public class Trade {
 		public void initContents() {
 			super.contents = new HashMap<Integer,MenuItem>();
 			
-			// Owner money in trade
-			ItemStack om = new ItemStack(Material.GREEN_WOOL,1);
-			ItemMeta it = om.getItemMeta();
-			it.setDisplayName(ChatColor.DARK_GREEN+ChatColor.BOLD.toString()+"Money in trade:");
-			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(this.t.money1)}));
-			super.contents.put(0,new ItemDummy(this,om));
-			
-			// Trader money in trade
-			ItemStack tm = new ItemStack(Material.GREEN_WOOL,1);
-			it = tm.getItemMeta();
-			it.setDisplayName(ChatColor.DARK_GREEN+ChatColor.BOLD.toString()+"Money in trade:");
-			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(this.t.money2)}));
-			super.contents.put(8,new ItemDummy(this,tm));
-			
 			// Aesthetics
 			for (int k = 36; k < 48; k++)
 				super.contents.put(k,new ItemDummy(this,new ItemStack(Material.LIME_STAINED_GLASS_PANE,1)));
@@ -77,7 +65,8 @@ public class Trade {
 			super.contents.put(50, new ItemExitMenu(this,new ItemStack(Material.BARRIER,1)));
 			super.contents.put(48, new ItemSwapMenu(this,new ItemStack(Material.FERN,1),new MenuMainAccepting(viewer,this.t)));
 			
-			super.composeInv();
+			this.updateContents();
+			this.updateMoney();
 		}
 		
 		public void updateContents()
@@ -89,6 +78,46 @@ public class Trade {
 			for (ItemStack i : items1)
 			{
 				counter++;
+				this.contents.put(9+(counter/4*9)+(counter%4),new ItemTriggerEvent(this, i, "rem",9+(counter/4*9)+(counter%4),i));
+			}
+			for (ItemStack i : items2)
+			{
+				counter++;
+				this.contents.put(9+(counter/4*9)+(counter%4+5),new ItemDummy(this, i));
+			}
+			this.composeInv();
+		}
+		
+		public void updateMoney()
+		{
+			// Owner money in trade
+			ItemStack om = new ItemStack(Material.GREEN_WOOL,1);
+			ItemMeta it = om.getItemMeta();
+			it.setDisplayName(ChatColor.DARK_GREEN+ChatColor.BOLD.toString()+"Money in trade:");
+			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(this.t.money1)}));
+			super.contents.put(0,new ItemSwapMenu(this,om,new MenuMoney(super.viewer,this.t)));
+			
+			// Trader money in trade
+			ItemStack tm = new ItemStack(Material.GREEN_WOOL,1);
+			it = tm.getItemMeta();
+			it.setDisplayName(ChatColor.DARK_GREEN+ChatColor.BOLD.toString()+"Money in trade:");
+			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(this.t.money2)}));
+			super.contents.put(8,new ItemDummy(this,tm));
+			this.composeInv();
+		}
+		
+		@Override
+		public void onClick(InventoryClickEvent e)
+		{
+			super.onClick(e);
+			if (e.getRawSlot() >= e.getInventory().getSize() && Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(super.view))
+			{
+				ItemStack i = e.getView().getItem(e.getRawSlot());
+				if (i!=null)
+				{
+					if (!this.t.items1.contains(i))
+						this.t.addItem(Main.players.get(e.getWhoClicked()), i);
+				}
 			}
 		}
 		
@@ -97,6 +126,16 @@ public class Trade {
 		{
 			if (another instanceof MenuMainAccepting)
 				this.t.setReady(this.viewer, true);
+		}
+		
+		@Override
+		public void onEvent(String id, Object... args)
+		{
+			if (id.equals("rem"))
+			{
+				this.contents.remove(args[0]);
+				this.t.removeItem(this.viewer, (ItemStack)args[1]);
+			}
 		}
 		
 		@Override
@@ -192,16 +231,68 @@ public class Trade {
 		{
 			super.initContents();
 			super.contents.put(48, new ItemDummy(this, new ItemStack(Material.LIME_STAINED_GLASS_PANE,1)));
-			super.contents.put(48, new ItemSwapMenu(this, new ItemStack(Material.FERN,1),null));
+			super.contents.put(48, new ItemTriggerEvent(this, new ItemStack(Material.FERN,1),"complete"));
 		}
 		
 		@Override
-		public void onSwap(Menu m)
+		public void onEvent(String id, Object...args)
 		{
-			if (m==null)
+			if (id.equals("complete"))
 				super.t.setComplete(super.viewer);
 		}
 		
+	}
+	
+	private static class MenuMoney extends Menu
+	{
+		private Trade t;
+		
+		public MenuMoney(FPlayer viewer, Trade t) {
+			super(viewer, 54);
+			this.t = t;
+		}
+		
+		private ItemStack getSlot(long amt)
+		{
+			ItemStack ret = new ItemStack((amt>0)?Material.GREEN_CONCRETE:Material.RED_CONCRETE,1);
+			ItemMeta r = ret.getItemMeta();
+			r.setDisplayName(ChatColor.GREEN + ((amt>0)?"Add "+Util.getMoney(amt)+" to trade":"Remove "+Util.getMoney(-amt)+ChatColor.GREEN+" from trade"));
+			ret.setItemMeta(r);
+			return ret;
+		}
+		
+		@Override
+		public void initContents() {
+			int c = 0;
+			for (long k = 1; k <= 100000000; k *= 10, c++)
+			{
+				this.contents.put(9+(c/4)*9+(c%4), new ItemTriggerEvent(this,getSlot(k),"m",k));
+				this.contents.put(9+(c/4)*9+(c%4+4), new ItemTriggerEvent(this,getSlot(-k),"m",-k));
+			}
+			this.contents.put(49, new ItemSwapMenu(this, new ItemStack(Material.BARRIER,1),new MenuMain(this.viewer,this.t)));
+			
+			this.updateMoney();
+		}
+		
+		private void updateMoney()
+		{
+			ItemStack i = new ItemStack(Material.GREEN_WOOL,1);
+			ItemMeta it = i.getItemMeta();
+			it.setDisplayName(ChatColor.GREEN+ChatColor.BOLD.toString()+"Money in trade: "+Util.getMoney(this.t.getMoneyTraded(this.viewer)));
+			i.setItemMeta(it);
+			this.contents.put(4, new ItemDummy(this,i));
+			this.composeInv();
+		}
+		
+		@Override
+		public void onEvent(String id, Object... args)
+		{
+			if (id.equals("m"))
+			{
+				this.t.addMoneyToTrade(this.viewer, -(int)args[0]);
+				this.updateMoney();
+			}
+		}
 	}
 	
 	public Trade(FPlayer p1, FPlayer p2)
@@ -240,9 +331,12 @@ public class Trade {
 	public void addMoneyToTrade(FPlayer p, long amt)
 	{
 		if (p1.getID()==p.getID())
-			this.money1+=amt;
+			this.money1+=(amt < 0 && this.money1 < amt) ? 0 : amt;
 		else if(p2.getID()==p.getID())
-			this.money2+=amt;
+			this.money2+=(amt < 0 && this.money2 < amt) ? 0 : amt;
+		
+		((MenuMain)this.p1.getMenu()).updateMoney();
+		((MenuMain)this.p2.getMenu()).updateMoney();
 	}
 	
 	public void addItem(FPlayer p, ItemStack i)
@@ -251,6 +345,9 @@ public class Trade {
 			this.items1.add(i);
 		else if(p2.getID()==p.getID())
 			this.items2.add(i);
+		
+		((MenuMain)this.p1.getMenu()).updateContents();
+		((MenuMain)this.p2.getMenu()).updateContents();
 	}
 	
 	public void removeItem(FPlayer p, ItemStack i)
@@ -259,6 +356,9 @@ public class Trade {
 			this.items1.remove(i);
 		else if(p2.getID()==p.getID())
 			this.items2.remove(i);
+		
+		((MenuMain)this.p1.getMenu()).updateContents();
+		((MenuMain)this.p2.getMenu()).updateContents();
 	}
 	
 	public boolean isReady(FPlayer p)
