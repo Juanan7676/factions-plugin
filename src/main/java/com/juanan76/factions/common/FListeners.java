@@ -3,6 +3,8 @@ package com.juanan76.factions.common;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -278,6 +280,18 @@ public class FListeners implements Listener {
 				Main.spawnShops.add(shopGeneradores);
 				Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
 				shopGeneradores.spawnEntity();
+				
+				Map<Enchantment,Integer> ench = new HashMap<Enchantment,Integer>();
+				ench.put(Enchantment.MENDING, 1);
+				NPC shopMagic = new NPCShop(ChatColor.AQUA+ChatColor.BOLD.toString()+"Magic shop", new Location(Bukkit.getWorld("world"),29,66,13),
+						Arrays.asList(new SellingItem[] {
+								new SellingItem(Material.EXPERIENCE_BOTTLE, ChatColor.RED+"[LL]"+ChatColor.WHITE+" eXP Bottle", 250),
+								new SellingItem(Material.ENCHANTED_GOLDEN_APPLE,ChatColor.RED+"[LL]"+ChatColor.WHITE+"gAPPLE",5000),
+								new SellingItem(Material.ENCHANTED_BOOK,ChatColor.RED+"[LL]"+ChatColor.WHITE+" inFTY Book",20000,ench)
+								}));
+				Main.spawnShops.add(shopMagic);
+				Bukkit.getPluginManager().registerEvents(shopMagic, Main.getPlugin(Main.class));
+				shopMagic.spawnEntity();
 			}
 		},1);
 	}

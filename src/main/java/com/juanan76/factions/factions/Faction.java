@@ -3,6 +3,7 @@ package com.juanan76.factions.factions;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -106,12 +107,14 @@ public class Faction {
 	
 	public void unclaimChunk(int x, int z) throws SQLException
 	{
-		for (Plot p : this.claimedChunks)
+		Iterator<Plot> it = this.claimedChunks.iterator();
+		while (it.hasNext())
 		{
+			Plot p = it.next();
 			if (p.getX()==x && p.getZ()==z)
 			{
 				p.remove();
-				this.claimedChunks.remove(p);
+				it.remove();
 			}
 		}
 	}
@@ -128,7 +131,7 @@ public class Faction {
 			if (rst.next()) // Chunk already claimed
 				return false;
 			else
-				return this.getRespect() >= this.getNPlots()*this.getNPlots()*this.getNPlots()*this.getNPlots();
+				return this.getRespect() >= this.getNPlots()*this.getNPlots()*this.getNPlots();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
