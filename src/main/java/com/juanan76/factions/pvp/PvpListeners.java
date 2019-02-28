@@ -88,16 +88,16 @@ public class PvpListeners implements Listener {
 					return;
 				if (kFaction.getID() != -1)
 				{
-					long respectGained = (long)Math.ceil(kFaction.getRespect()*0.01);
+					long respectGained = (long)Math.ceil(kFaction.getRespect()*0.2);
 					
-					kFaction.addRespect(-(long)Math.ceil(respectGained/2));
+					kFaction.addRespect(-respectGained);
 					wFaction.addRespect(respectGained);
 					
 					killer.sendTitle("Killed: ["+Main.players.get(killed).getFactionObject().getShortName(Main.players.get(killer).getFactionObject())+"]"+ChatColor.WHITE+killed.getName(), ChatColor.GREEN+"+"+respectGained+" respect!", 20, 60, 20);
 					for (FPlayer p : Main.players.values())
 					{
 						if (p.getFaction()==kFaction.getID())
-							p.sendMessage(PluginPart.PVP, ChatColor.RED+"Your faction lost "+(long)Math.ceil(respectGained/2)+" respect due to a member being slain!");
+							p.sendMessage(PluginPart.PVP, ChatColor.RED+"Your faction lost "+respectGained+" respect due to a member being slain!");
 						else if (p.getFaction()==wFaction.getID())
 							p.sendMessage(PluginPart.PVP, ChatColor.GREEN+"Your faction gained "+respectGained+" respect thanks to a player kill!");
 					}

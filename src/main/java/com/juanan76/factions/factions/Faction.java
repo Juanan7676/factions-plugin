@@ -131,7 +131,7 @@ public class Faction {
 			if (rst.next()) // Chunk already claimed
 				return false;
 			else
-				return this.getRespect() >= this.getNPlots()*this.getNPlots()*this.getNPlots()*this.getNPlots();
+				return this.getRespect() >= this.getNPlots()*this.getNPlots()*this.getNPlots();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

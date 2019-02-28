@@ -212,6 +212,11 @@ public class FactionCommand implements CommandExecutor {
 			}
 			else if (args[0].equalsIgnoreCase("list"))
 			{
+				if (args.length != 2)
+				{
+					Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.RED+"Malformed command!");
+					return true;
+				}
 				int f = Integer.parseInt(args[1]);
 				ResultSet rst;
 				try {
@@ -364,7 +369,7 @@ public class FactionCommand implements CommandExecutor {
 					if (f.isClaimable(Main.players.get(sender).getChunkX(), Main.players.get(sender).getChunkZ(),Util.convertWorld(((Player) sender).getWorld())))
 						try {
 							f.claimChunk(Main.players.get(sender).getChunkX(), Main.players.get(sender).getChunkZ(),Util.convertWorld(((Player) sender).getWorld()), desc);
-							Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.GREEN+"Chunk claimed to your faction! Required respect to claim another chunk: "+ChatColor.YELLOW+(f.getNPlots()*f.getNPlots()*f.getNPlots()*f.getNPlots()));
+							Main.players.get(sender).sendMessage(PluginPart.FACTIONS, ChatColor.GREEN+"Chunk claimed to your faction! Required respect to claim another chunk: "+ChatColor.YELLOW+(f.getNPlots()*f.getNPlots()*f.getNPlots()));
 							Main.players.get(sender).updateTerritory();
 						} catch (SQLException e) {
 							e.printStackTrace();

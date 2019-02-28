@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.juanan76.factions.common.Util;
@@ -21,6 +22,7 @@ public class SellingItem {
 	private String name;
 	private List<String> lore;
 	private boolean hideEnchants;
+	private boolean storeEnchants;
 	
 	public SellingItem(Material m, String name, double pricePerUnit, Map<Enchantment,Integer> ench, List<String> lore, boolean hideEnchants)
 	{
@@ -30,6 +32,13 @@ public class SellingItem {
 		this.name = name;
 		this.lore = lore;
 		this.hideEnchants = hideEnchants;
+		this.storeEnchants = false;
+	}
+	
+	public SellingItem(Material m, String name, double pricePerUnit, Map<Enchantment,Integer> ench)
+	{
+		this(m,name,pricePerUnit,ench,null,false);
+		this.storeEnchants = true;
 	}
 	
 	public SellingItem(Material m, String name, double pricePerUnit)
@@ -40,10 +49,18 @@ public class SellingItem {
 	public ItemStack getItemStack(int qty)
 	{
 		ItemStack i = new ItemStack(this.m,qty);
-		if (this.ench != null)
+		if (!this.storeEnchants && this.ench != null)
 			i.addUnsafeEnchantments(this.ench);
+		else if (this.ench != null)
+		{
+			EnchantmentStorageMeta e = (EnchantmentStorageMeta)i.getItemMeta();
+			for (Enchantment k : this.ench.keySet())
+				e.addStoredEnchant(k, this.ench.get(k), true);
+			i.setItemMeta(e);
+		}
 		ItemMeta it = i.getItemMeta();
-		it.setDisplayName(this.name);
+		if (this.name != null)
+			it.setDisplayName(this.name);
 		if (this.lore != null)
 			it.setLore(this.lore);
 		if (this.hideEnchants)
