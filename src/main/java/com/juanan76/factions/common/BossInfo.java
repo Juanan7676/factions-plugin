@@ -6,7 +6,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class BossInfo implements Runnable {
 	
-	public final String info = "    [J76 FACTIONS PUBLIC BETA v0.1] ENJOY THE SERVER!";
+	public final String info = "    [J76 FACTIONS PUBLIC BETA v0.2] NOW TRADES ARE AVAILABLE!";
 	
 	private int currOffset = 0;
 	private int tickCount = 0;
