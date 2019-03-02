@@ -26,6 +26,7 @@ import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -35,6 +36,7 @@ import org.bukkit.inventory.ItemStack;
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.tellraw.ClickableComponent;
 import com.juanan76.factions.common.tellraw.TextComponent;
+import com.juanan76.factions.economy.Trade;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.Plot;
 import com.juanan76.factions.factions.gens.Generator;
@@ -126,6 +128,22 @@ public class FListeners implements Listener {
 	public void onInteract(PlayerInteractEvent e)
 	{
 		if (!Main.players.get(e.getPlayer()).isLogged()) e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onInteractAtEntity(PlayerInteractEntityEvent e)
+	{
+		if (e.getRightClicked().getType()==EntityType.PLAYER && Main.players.get(e.getPlayer()).isLogged())
+		{
+			if (Main.players.get(e.getRightClicked()).isLogged())
+			{
+				if(Main.players.get(e.getPlayer()).getMenu()==null && Main.players.get(e.getRightClicked()).getMenu()==null)
+				{
+					Trade t = new Trade(Main.players.get(e.getPlayer()), Main.players.get(e.getRightClicked()));
+					Main.trades.add(t);
+				}
+			}
+		}
 	}
 	
 	@EventHandler

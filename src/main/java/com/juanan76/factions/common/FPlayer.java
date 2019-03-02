@@ -69,6 +69,7 @@ public class FPlayer {
 		this.scoreboard = null;
 		this.xchunk = p.getLocation().getBlockX()/16;
 		this.zchunk = p.getLocation().getBlockZ()/16;
+		this.currMenu = null;
 	}
 	
 	public void sendMessage(PluginPart sender, String msg)
@@ -266,9 +267,11 @@ public class FPlayer {
 	
 	public void openMenu(Menu m)
 	{
-		this.currMenu = m;
+		this.currMenu = null;
+		m.initContents();
 		m.composeInv();
 		this.assoc.openInventory(m.getInv());
+		this.currMenu = m;
 	}
 	
 	public void closeMenu()

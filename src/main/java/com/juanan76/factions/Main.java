@@ -24,6 +24,7 @@ import com.juanan76.factions.common.Pay;
 import com.juanan76.factions.common.Register;
 import com.juanan76.factions.common.Sell;
 import com.juanan76.factions.common.Util;
+import com.juanan76.factions.economy.Trade;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
 import com.juanan76.factions.factions.gens.Generator;
@@ -46,6 +47,7 @@ public class Main extends JavaPlugin
 	public static final Map<Integer,Faction> factions = new HashMap<Integer,Faction>();
 	public static final Map<Integer,Teleport> teleports = new HashMap<Integer,Teleport>();
 	public static final List<NPC> spawnShops = new Vector<NPC>();
+	public static final List<Trade> trades = new Vector<Trade>();
 	public static final Map<Location,Generator> gens = new HashMap<Location,Generator>();
 	public static final BossBar info = Bukkit.createBossBar("", BarColor.PURPLE , BarStyle.SOLID);
 	

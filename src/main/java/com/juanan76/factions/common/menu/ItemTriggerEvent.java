@@ -10,6 +10,8 @@ public class ItemTriggerEvent extends MenuItem {
 	public ItemTriggerEvent(Menu m, ItemStack repr, String id, Object... args) {
 		super(m, repr);
 		this.args = args;
+		this.id = id;
+		this.args = args;
 	}
 
 	@Override
