@@ -1,18 +1,24 @@
 package com.juanan76.factions;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.juanan76.factions.common.BossInfo;
@@ -37,6 +43,8 @@ import com.juanan76.factions.pvp.Spawn;
 import com.juanan76.factions.pvp.Tele;
 import com.juanan76.factions.pvp.Teleport;
 
+import net.milkbowl.vault.permission.Permission;
+
 
 public class Main extends JavaPlugin 
 {
@@ -50,6 +58,8 @@ public class Main extends JavaPlugin
 	public static final List<Trade> trades = new Vector<Trade>();
 	public static final Map<Location,Generator> gens = new HashMap<Location,Generator>();
 	public static final BossBar info = Bukkit.createBossBar("", BarColor.PURPLE , BarStyle.SOLID);
+	public static final Map<String,String> prefixes = new HashMap<String,String>();
+	public static Permission perms = null;
 	
 	@Override
 	public void onEnable()
@@ -168,11 +178,35 @@ public class Main extends JavaPlugin
 				Location l = new Location(Util.iconvertWorld(rst.getInt("world")),rst.getInt("x"),rst.getInt("y"),rst.getInt("z"));
 				Main.gens.put(l, new Generator(Main.factions.get(rst.getInt("faccion")), l, rst.getInt("lvl"), rst.getInt("progress")));
 			}
+			
+			
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(new File("plugins/Essentials/config.yml"));
+			Set<String> rangos = config.getConfigurationSection("chat.group-formats").getKeys(false);
+			
+			Pattern formato = Pattern.compile("^(.*) \\{DISPLAYNAME\\}.*");
+			for (String r : rangos)
+			{
+				String str = config.getString("chat.group-formats."+r);
+				System.out.println(str);
+				Matcher m = formato.matcher(str);
+				if (m.matches()) {
+					prefixes.put(r, m.group(1));
+					System.out.println(m.group(1));
+				}
+				
+				
+			}
+			setupPermissions();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 	}
+	
+	private void setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+    }
 	
 	@Override
 	public void onDisable()

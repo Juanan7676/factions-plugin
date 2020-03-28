@@ -113,11 +113,12 @@ public class FListeners implements Listener {
 		{
 			e.setCancelled(true);
 			Faction chatterFaction = Main.players.get(e.getPlayer()).getFactionObject();
+			System.out.println(Main.perms.getPrimaryGroup(e.getPlayer()));
 			Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
 				@Override
 				public void run() {
 					for (FPlayer p : Main.players.values())
-						Util.tellRaw(p.getPlayer().getName(), new TextComponent("<["), new ClickableComponent(ChatColor.BOLD+chatterFaction.getShortName(p.getFactionObject())+ChatColor.RESET+"]","white",true,"View this faction's info","/f info "+chatterFaction.getID()), new TextComponent(e.getPlayer().getName()+"> "+e.getMessage()));
+						Util.tellRaw(p.getPlayer().getName(), new TextComponent("<"+ChatColor.translateAlternateColorCodes('&', Main.prefixes.get(Main.perms.getPrimaryGroup(e.getPlayer())))+ChatColor.RESET+"["), new ClickableComponent(ChatColor.BOLD+chatterFaction.getShortName(p.getFactionObject())+ChatColor.RESET+"]","white",true,"View this faction's info","/f info "+chatterFaction.getID()), new TextComponent(e.getPlayer().getName()+"> "+e.getMessage()));
 				}
 				
 			}, 1);

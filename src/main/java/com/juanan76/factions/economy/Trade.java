@@ -60,7 +60,7 @@ public class Trade {
 			this.t = t;
 			super.title = ChatColor.BLACK+ChatColor.BOLD.toString()+"Trading with "+ChatColor.GREEN+ChatColor.BOLD.toString()+((t.p1.getID()==viewer.getID())?t.p2.getPlayer().getName():t.p1.getPlayer().getName());
 		}
-
+		
 		@Override
 		public void initContents() {
 			super.contents = new HashMap<Integer,MenuItem>();
@@ -128,7 +128,9 @@ public class Trade {
 			it.setDisplayName(ChatColor.DARK_GREEN+ChatColor.BOLD.toString()+"Money in trade:");
 			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(this.t.getMoneyTraded(p1)),"","Click to add/remove money from trade"}));
 			om.setItemMeta(it);
-			super.contents.put(0,new ItemSwapMenu(this,om,new MenuMoney(super.viewer,this.t)));
+			
+			if (this.canAdd()) super.contents.put(0,new ItemSwapMenu(this,om,new MenuMoney(super.viewer,this.t)));
+			else super.contents.put(0,new ItemDummy(this,om));
 			
 			// Trader money in trade
 			ItemStack tm = new ItemStack(Material.GREEN_WOOL,1);
@@ -140,18 +142,25 @@ public class Trade {
 			this.composeInv();
 		}
 		
+		protected boolean canAdd()
+		{
+			return true;
+		}
+		
 		@Override
 		@EventHandler
 		public void onClick(InventoryClickEvent e)
 		{
 			super.onClick(e);
-			if (e.getClickedInventory().equals(e.getView().getBottomInventory()) && Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(super.view))
+			if (e.getClickedInventory().equals(e.getView().getBottomInventory()) && Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(super.view) && this.canAdd())
 			{
 				ItemStack i = e.getView().getItem(e.getRawSlot());
 				if (i!=null)
 					this.t.addItem(Main.players.get(e.getWhoClicked()), i);
 			}
 		}
+		
+		
 		
 		@Override
 		public void onSwap(Menu another)
@@ -163,7 +172,7 @@ public class Trade {
 		@Override
 		public void onEvent(String id, Object... args)
 		{
-			if (id.equals("rem"))
+			if (id.equals("rem") && this.canAdd())
 			{
 				this.contents.remove(args[0]);
 				this.t.removeItem(this.viewer, (ItemStack)args[1]);
@@ -195,6 +204,12 @@ public class Trade {
 		}
 		
 		@Override
+		protected boolean canAdd()
+		{
+			return false;
+		}
+		
+		@Override
 		public void onSwap(Menu m)
 		{
 			if (m instanceof MenuMain)
@@ -214,6 +229,12 @@ public class Trade {
 			super(viewer, t);
 			this.ticksToComplete = 100;
 			this.taskID = taskID;
+		}
+		
+		@Override
+		protected boolean canAdd()
+		{
+			return false;
 		}
 		
 		public void updateCountdown()
@@ -283,6 +304,12 @@ public class Trade {
 			it.setLore(Arrays.asList(new String[] {"",Util.getMoney(super.t.getMoneyTraded(this.viewer))}));
 			om.setItemMeta(it);
 			super.contents.put(0,new ItemDummy(this,om));
+		}
+		
+		@Override
+		protected boolean canAdd()
+		{
+			return false;
 		}
 		
 		@Override
@@ -490,12 +517,22 @@ public class Trade {
 	{
 		for (ItemStack i : items1)
 		{
-			p2.getPlayer().getWorld().dropItem(p1.getPlayer().getLocation(), i);
+			HashMap<Integer,ItemStack> failed = p2.getPlayer().getInventory().addItem(i);
+			for (ItemStack o : failed.values())
+			{
+				p2.getPlayer().getWorld().dropItem(p2.getPlayer().getLocation(), o);
+			}
+			
 			p1.getPlayer().getInventory().remove(i);
 		}
 		for (ItemStack i : items2)
 		{
-			p1.getPlayer().getWorld().dropItem(p1.getPlayer().getLocation(), i);
+			HashMap<Integer,ItemStack> failed = p1.getPlayer().getInventory().addItem(i);
+			for (ItemStack o : failed.values())
+			{
+				p1.getPlayer().getWorld().dropItem(p1.getPlayer().getLocation(), o);
+			}
+			
 			p2.getPlayer().getInventory().remove(i);
 		}
 		p2.addMoney(this.money1);
