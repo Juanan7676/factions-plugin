@@ -177,8 +177,10 @@ public class FListeners implements Listener {
 							String input2 = ChatColor.translateAlternateColorCodes('&', m.group(3));
 							TextComponent text = new TextComponent(ChatColor.getLastColors(input2) + message);
 
-							if(message.charAt(0) == '!')
-								text.setColor("light_blue");
+							if(message.charAt(0) == '!'){
+								text.setText(message.substring(1, message.length()));
+								text.setColor("aqua");
+							}
 							l.add(text);
 						}
 						if (m.group(5) != null)

@@ -38,4 +38,8 @@ public class TextComponent implements TellRawComponent {
 		color = ChatColor.of(newColor);
 	}
 
+	public void setText(String text){
+		this.text = text;
+	}
+
 }

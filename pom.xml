@@ -40,13 +40,11 @@
     	<scope>provided</scope>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
-	<dependency>
-       	<groupId>org</groupId>
-       	<artifactId>sqlite</artifactId>
-       	<systemPath>${project.basedir}/sqlite-jdbc-3.23.1.jar</systemPath>
-       	<scope>system</scope>
-       	<version>1.0</version>
-       </dependency>
+	  <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.23.1</version>
+</dependency>
     <dependency>
         <groupId>com.github.MilkBowl</groupId>
         <artifactId>VaultAPI</artifactId>
