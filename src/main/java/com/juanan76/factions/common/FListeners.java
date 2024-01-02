@@ -144,13 +144,20 @@ public class FListeners implements Listener {
 				
 				@Override
 				public void run() {
+					String message = e.getMessage();
 					for (FPlayer p : Main.players.values()) {
 						if (!p.isLogged()) continue;
+						if (p.getPlayer().getLocation().distanceSquared(player.getPlayer().getLocation()) > 30*30 && message.charAt(0) != '!') continue;
 						List<TellRawComponent> l = new Vector<TellRawComponent>();
 						
 						String input1 = ChatColor.translateAlternateColorCodes('&', m.group(1));
 						
 						if (m.group(1) != null)
+							if(message.charAt(0) == '!'){
+								l.add(new TextComponent("["));
+								l.add(new TextComponent("GLOBAL", "red", true));
+								l.add(new TextComponent("]"));
+							}
 							l.add(new TextComponent(input1));
 						if (m.group(2) != null)
 						{
@@ -168,7 +175,11 @@ public class FListeners implements Listener {
 						if (m.group(4) != null)
 						{
 							String input2 = ChatColor.translateAlternateColorCodes('&', m.group(3));
-							l.add(new TextComponent(ChatColor.getLastColors(input2)+e.getMessage()));
+							TextComponent text = new TextComponent(ChatColor.getLastColors(input2) + message);
+
+							if(message.charAt(0) == '!')
+								text.setColor("light_blue");
+							l.add(text);
 						}
 						if (m.group(5) != null)
 							l.add(new TextComponent(ChatColor.translateAlternateColorCodes('&', m.group(5))));
