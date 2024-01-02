@@ -7,6 +7,8 @@ import org.bukkit.ChatColor;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.DBManager;
+import com.juanan76.factions.common.FListeners;
+import com.juanan76.factions.factions.Faction.FactionRelation;
 
 public class Plot {
 	private int x;
@@ -25,9 +27,17 @@ public class Plot {
 		ResultSet rst = DBManager.performQuery("select * from plots where x="+x+" and y="+z+" and world="+world);
 		if (!rst.next())
 		{
-			this.title = ChatColor.GRAY+"Wilderness";
-			this.desc = "Be careful out there, traveler.";
-			this.f = -1;
+			if ((Math.abs(x-FListeners.spawnX/16)<=10 && Math.abs(z-FListeners.spawnZ/16)<=10) && world==0)
+			{
+				this.title = ChatColor.DARK_PURPLE + ChatColor.MAGIC.toString() + "m" + ChatColor.RESET + ChatColor.DARK_PURPLE + "Spawn" + ChatColor.MAGIC + "m";
+				this.desc = "Where everything starts.";
+				this.f = -2;
+			}
+			else {
+				this.title = ChatColor.GRAY+"Wilderness";
+				this.desc = "Be careful out there, traveler.";
+				this.f = -1;
+			}
 		}
 		else
 		{
@@ -63,16 +73,16 @@ public class Plot {
 	
 	public String getTitle(Faction user)
 	{
-		if (this.f == -1)
+		if (this.f == -1 || this.f == -2)
 			return ChatColor.GRAY+this.getTitle();
 		else
 		{
-			String rel = Main.factions.get(this.f).getRelation(user);
-			if (rel=="a")
+			FactionRelation rel = Main.factions.get(this.f).getRelation(user);
+			if (rel==FactionRelation.ALLIANCE)
 				return ChatColor.BLUE+this.getTitle();
-			else if (rel=="o")
+			else if (rel==FactionRelation.OWN)
 				return ChatColor.GREEN+this.getTitle();
-			else if (rel=="n")
+			else if (rel==FactionRelation.NEUTRAL)
 				return ChatColor.RED+this.getTitle();
 			else
 				return ChatColor.DARK_RED+this.getTitle();

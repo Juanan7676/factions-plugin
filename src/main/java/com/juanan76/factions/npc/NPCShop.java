@@ -1,5 +1,7 @@
 package com.juanan76.factions.npc;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,10 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
 import com.juanan76.factions.Main;
+import com.juanan76.factions.common.DBManager;
 import com.juanan76.factions.common.FPlayer;
 
 public class NPCShop extends NPC {
@@ -24,6 +26,18 @@ public class NPCShop extends NPC {
 	
 	public NPCShop(String name, Location l, List<SellingItem> stock)
 	{
+		super.interacters = new HashSet<FPlayer>();
+		this.name = name;
+		this.l = l;
+		this.interactions = new HashMap<FPlayer,Inventory>();
+		this.stock = stock;
+	}
+	
+	public NPCShop(String npcName, String name, Location l, List<SellingItem> stock) throws SQLException
+	{
+		ResultSet rst = DBManager.performSafeQuery("select uuid from npcs where npc_id=?", "s", npcName);
+		if (!rst.next()) throw new IllegalStateException("Npc does not exist");
+		super.uuid = rst.getString("uuid");
 		super.interacters = new HashSet<FPlayer>();
 		this.name = name;
 		this.l = l;
@@ -71,13 +85,13 @@ public class NPCShop extends NPC {
 	}
 	
 	@Override
-	public void handleClose(InventoryCloseEvent e)
+	public void handleClose(FPlayer p)
 	{
-		if (this.interactions.containsKey(Main.players.get(e.getPlayer())) && e.getInventory().equals(this.interactions.get(Main.players.get(e.getPlayer()))))
+		if (this.interactions.containsKey(p))
 		{
-			this.interactions.remove(Main.players.get(e.getPlayer()));
-			super.stopInteraction(Main.players.get(e.getPlayer()));
-			Main.players.get(e.getPlayer()).closeShop();
+			this.interactions.remove(p);
+			super.stopInteraction(p);
+			p.closeShop();
 		}
 	}
 
@@ -109,6 +123,12 @@ public class NPCShop extends NPC {
 	@Override
 	public boolean isUnpusheable() {
 		return true;
+	}
+
+	@Override
+	public void save(String npc_name) throws SQLException {
+		DBManager.performSafeExecute("insert into npcs values (?,?)","ss",npc_name, this.uuid);
+		
 	}
 
 }

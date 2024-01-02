@@ -3,6 +3,7 @@ package com.juanan76.factions.pvp;
 import org.bukkit.Location;
 
 import com.juanan76.factions.common.FPlayer;
+import com.juanan76.factions.factions.Faction.FactionRelation;
 
 public class TeleportPlayer extends Teleport {
 	
@@ -22,7 +23,7 @@ public class TeleportPlayer extends Teleport {
 	{
 		this.to = to;
 		super.config(teleported);
-		if (to.getFactionObject().getRelation(teleported.getFactionObject()).equalsIgnoreCase("a"))
+		if (to.getFactionObject().getRelation(teleported.getFactionObject()) == FactionRelation.ALLIANCE)
 		{ // Friendly faction: cost,time x 2
 			super.cost *= 2;
 			super.remainingTicks *= 2;

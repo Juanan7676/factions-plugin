@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import com.juanan76.factions.Main;
@@ -41,6 +42,12 @@ public class Pay implements CommandExecutor {
 			{
 				return false;
 			}
+		}
+		else if (sender instanceof ConsoleCommandSender) {
+			FPlayer payee = FPlayer.fromNick(args[0]);
+			long qty = Long.parseLong(args[1]);
+			payee.addMoney(qty);
+			payee.sendMessage(PluginPart.ECONOMY, ChatColor.GREEN+"You received "+Util.getMoney(qty)+" from "+ChatColor.YELLOW+"Server");
 		}
 		return true;
 	}

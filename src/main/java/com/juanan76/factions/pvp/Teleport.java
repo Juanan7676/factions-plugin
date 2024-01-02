@@ -63,26 +63,26 @@ public abstract class Teleport {
 	{
 		this.started = true;
 		this.teleported.sendMessage(PluginPart.PVP, ChatColor.GREEN+"Initiating teleport:");
-		Util.tellSeparator(this.teleported.getPlayer().getName());
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Teleporting to: ","yellow"), new TextComponent(this.getLocationName(),"green"));
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent(" "));
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Cost: ","red"), new TextComponent(String.format("%.2f", Math.sqrt(this.distance))+" blocks = ","yellow"),
+		Util.tellSeparator(this.teleported);
+		Util.tellRaw(this.teleported, new TextComponent("► Teleporting to: ","yellow"), new TextComponent(this.getLocationName(),"green"));
+		Util.tellRaw(this.teleported, new TextComponent(" "));
+		Util.tellRaw(this.teleported, new TextComponent("► Cost: ","red"), new TextComponent(String.format("%.2f", Math.sqrt(this.distance))+" blocks = ","yellow"),
 				new TextComponent(Util.getMoney(this.rawCost)));
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Modifiers: ","red"));
+		Util.tellRaw(this.teleported, new TextComponent("► Modifiers: ","red"));
 		int time = this.rawTime;
 		if (this.amigo)
 		{
-			Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("    ► Teleporting to friendly faction: ","blue"), new TextComponent(Util.getMoney(this.rawCost)), new TextComponent(" x 2 = ","red"),
-					new TextComponent(Util.getMoney(this.rawCost*2)), new TextComponent(" "+time+"s x 2 = ","red"), new TextComponent(Integer.toString(time*2)+"s","red"));
+			Util.tellRaw(this.teleported, new TextComponent("    ► Teleporting to friendly faction: ","blue"), new TextComponent(Util.getMoney(this.rawCost)), new TextComponent(" x 2 = ","red"),
+					new TextComponent(Util.getMoney(this.rawCost*2)), new TextComponent(" "+time/20+"s x 2 = ","red"), new TextComponent(Integer.toString(time/20*2)+"s","red"));
 			time *= 2;
 		}
 		if (this.wilderness)
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("    ► Teleporting from wilderness: ","blue"), new TextComponent(" "+time/20+"s x 3 = ","red"), new TextComponent(Integer.toString(time*3/20)+"s","red"));
+		Util.tellRaw(this.teleported, new TextComponent("    ► Teleporting from wilderness: ","blue"), new TextComponent(" "+time/20+"s x 3 = ","red"), new TextComponent(Integer.toString(time*3/20)+"s","red"));
 		
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent(" "));
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Final cost: ","dark_red"), new TextComponent(Util.getMoney(this.cost)));
-		Util.tellRaw(this.teleported.getPlayer().getName(), new TextComponent("► Final time: ","dark_red"), new TextComponent(this.remainingTicks/20+"s","yellow"));
-		Util.tellSeparator(this.teleported.getPlayer().getName());
+		Util.tellRaw(this.teleported, new TextComponent(" "));
+		Util.tellRaw(this.teleported, new TextComponent("► Final cost: ","dark_red"), new TextComponent(Util.getMoney(this.cost)));
+		Util.tellRaw(this.teleported, new TextComponent("► Final time: ","dark_red"), new TextComponent(this.remainingTicks/20+"s","yellow"));
+		Util.tellSeparator(this.teleported);
 		if (this.teleported.getMoney() < this.cost)
 			this.teleported.sendMessage(PluginPart.PVP, ChatColor.RED+"Teleport failed: you don't have enough money");
 		else

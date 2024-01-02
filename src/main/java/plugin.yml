@@ -30,3 +30,12 @@ commands:
     sethome:
         description: set your home at your current location
         usage: /sethome
+    trade:
+        description: internal usage
+        usage: /trade <accept|refuse>
+    sqlexec:
+        description: (console only) execute sql commands directly to database
+        usage: /sqlexec <sqlins>
+    spawnnpcs:
+        description: (console only) spawn npcs on the server
+        usage: /spawnnpcs

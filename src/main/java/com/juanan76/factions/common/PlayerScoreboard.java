@@ -13,6 +13,7 @@ import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 
 import com.juanan76.factions.Main;
+import com.juanan76.factions.factions.Faction.FactionRelation;
 import com.juanan76.factions.factions.Plot;
 
 public class PlayerScoreboard {
@@ -90,14 +91,16 @@ public class PlayerScoreboard {
 				Plot p = new Plot(x+ox,z+oz,Util.convertWorld(this.assoc.getWorld()));
 				if (p.getFaction()==-1)
 					colors[ox+3][oz+3]=ChatColor.GRAY;
+				else if (p.getFaction()==-2)
+					colors[ox+3][oz+3]=ChatColor.DARK_PURPLE;
 				else if (p.getFaction() == faction)
 					colors[ox+3][oz+3]=ChatColor.GREEN;
 				else
 				{
-					String rel = Main.factions.get(p.getFaction()).getRelation(Main.factions.get(faction));
-					if (rel.equalsIgnoreCase("a"))
+					FactionRelation rel = Main.factions.get(p.getFaction()).getRelation(Main.factions.get(faction));
+					if (rel == FactionRelation.ALLIANCE)
 						colors[ox+3][oz+3]=ChatColor.AQUA;
-					else if (rel.equalsIgnoreCase("w"))
+					else if (rel == FactionRelation.WAR)
 						colors[ox+3][oz+3]=ChatColor.DARK_RED;
 					else
 						colors[ox+3][oz+3]=ChatColor.RED;
@@ -128,7 +131,7 @@ public class PlayerScoreboard {
 	{
 		try {
 			if (this.fact != null) this.scoreboard.resetScores(this.fact.getEntry());
-			this.fact = dummy.getScore(ChatColor.GREEN+Main.factions.get(Main.players.get(this.assoc).getFaction()).getName());
+			this.fact = dummy.getScore(ChatColor.GREEN+Main.factions.get(Main.players.get(this.assoc).getFaction()).getName(Main.players.get(this.assoc).getFactionObject()));
 			this.fact.setScore(10);
 		} catch (IllegalArgumentException | IllegalStateException e) {
 			e.printStackTrace();

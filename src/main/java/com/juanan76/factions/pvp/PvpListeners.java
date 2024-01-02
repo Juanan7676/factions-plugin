@@ -23,6 +23,7 @@ import com.juanan76.factions.common.FPlayer;
 import com.juanan76.factions.common.PluginPart;
 import com.juanan76.factions.common.Util;
 import com.juanan76.factions.factions.Faction;
+import com.juanan76.factions.factions.War;
 
 public class PvpListeners implements Listener {
 	
@@ -62,8 +63,10 @@ public class PvpListeners implements Listener {
 	}
 	
 	@EventHandler
-	public void onLogout(PlayerQuitEvent e)
+	public void onLogout(PlayerQuitEvent e) throws SQLException
 	{
+		if (Main.players.get(e.getPlayer()) == null || !Main.players.get(e.getPlayer()).isLogged())
+			return;
 		if (Main.pvp.get(e.getPlayer()).onFight)
 		{
 			PlayerInventory i = e.getPlayer().getInventory();
@@ -72,8 +75,30 @@ public class PvpListeners implements Listener {
 				if (it != null)
 					i.getLocation().getWorld().dropItemNaturally(e.getPlayer().getLocation(), it);
 			}
+			for (ItemStack it : i.getArmorContents()) {
+				if (it != null)
+					i.getLocation().getWorld().dropItemNaturally(e.getPlayer().getLocation(), it);
+			}
+			for (ItemStack it : i.getExtraContents()) {
+				if (it != null)
+					i.getLocation().getWorld().dropItemNaturally(e.getPlayer().getLocation(), it);
+			}
+			i.setArmorContents(null);
+			i.setExtraContents(null);
 			i.clear();
 			Bukkit.getServer().broadcastMessage(ChatColor.DARK_PURPLE + "Player " + ChatColor.YELLOW + e.getPlayer().getDisplayName() + ChatColor.DARK_PURPLE + " logged out while in combat and dropped his whole inventory!");
+			
+			Faction f;
+			if ((f = Main.players.get(e.getPlayer()).getFactionObject()).getID() != -1) {
+				long respectLost = (long)Math.ceil(f.getRespect()*0.2);
+				f.addRespect(-respectLost);
+				for (FPlayer p : Main.players.values())
+				{
+					if (p.getFaction()==f.getID())
+						p.sendMessage(PluginPart.PVP, ChatColor.RED+"Your faction lost "+respectLost+" respect due to a member disconnecting while in combat!");
+				}
+				Main.players.get(e.getPlayer()).setDeath(true);
+			}
 		}
 		if (Main.pvpUpdaters.containsKey(e.getPlayer()))
 		{
@@ -99,7 +124,7 @@ public class PvpListeners implements Listener {
 					return;
 				if (kFaction.getID() != -1)
 				{
-					long respectGained = (long)Math.ceil(kFaction.getRespect()*0.2);
+					long respectGained = (long)Math.ceil(kFaction.getRespect()*0.05);
 					
 					kFaction.addRespect(-respectGained);
 					wFaction.addRespect(respectGained);
@@ -112,6 +137,7 @@ public class PvpListeners implements Listener {
 						else if (p.getFaction()==wFaction.getID())
 							p.sendMessage(PluginPart.PVP, ChatColor.GREEN+"Your faction gained "+respectGained+" respect thanks to a player kill!");
 					}
+					War.fromFactions(kFaction, wFaction).ifPresent(w -> w.addCasualty(kFaction));
 				}
 				else
 				{
@@ -125,5 +151,10 @@ public class PvpListeners implements Listener {
 				}
 			}
 		}
+		
+		if (e.getEntity().getKiller() != null)
+		Main.players.get((Player)e.getEntity()).setDeath(true);
+		else
+			Main.players.get((Player)e.getEntity()).setDeath(false);
 	}
 }

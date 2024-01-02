@@ -48,6 +48,7 @@ public class DBManager {
 		{
 			if (t.equalsIgnoreCase("i")) pstmt.setInt(counter+1, (Integer)args[counter]);
 			else if (t.equalsIgnoreCase("s")) pstmt.setString(counter+1, (String)args[counter]);
+			else if (t.equalsIgnoreCase("l")) pstmt.setLong(counter+1, (Long)args[counter]);
 			else throw new IllegalArgumentException("Invalid SafeExceute!");
 			counter++;
 		}
@@ -63,7 +64,8 @@ public class DBManager {
 		{
 			if (t.equalsIgnoreCase("i")) pstmt.setInt(counter+1, (Integer)args[counter]);
 			else if (t.equalsIgnoreCase("s")) pstmt.setString(counter+1, (String)args[counter]);
-			else throw new IllegalArgumentException("Invalid SafeExceute!");
+			else if (t.equalsIgnoreCase("l")) pstmt.setLong(counter+1, (Long)args[counter]);
+			else throw new IllegalArgumentException("Invalid SafeQuery!");
 			counter++;
 		}
 		return pstmt.executeQuery();

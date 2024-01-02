@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.FPlayer;
 import com.juanan76.factions.common.PluginPart;
+import com.juanan76.factions.factions.Faction.FactionRelation;
 
 public class Tele implements CommandExecutor {
 
@@ -28,8 +29,8 @@ public class Tele implements CommandExecutor {
 				return true;
 			else
 			{
-				String rel = fuser.getFactionObject().getRelation(Main.players.get(sender).getFactionObject());
-				if (rel.equals("a") || rel.equals("o"))
+				FactionRelation rel = fuser.getFactionObject().getRelation(Main.players.get(sender).getFactionObject());
+				if (rel == FactionRelation.ALLIANCE || rel == FactionRelation.OWN)
 				{
 					Teleport t = new TeleportPlayer(fuser,Main.players.get(sender));
 					t.start();

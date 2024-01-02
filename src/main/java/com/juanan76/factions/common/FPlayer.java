@@ -2,6 +2,7 @@ package com.juanan76.factions.common;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -49,6 +50,15 @@ public class FPlayer {
 				return p;
 		}
 		return null;
+	}
+	
+	public static int IDfromnick(String nick) throws SQLException
+	{
+		ResultSet rst = DBManager.performSafeQuery("select id from users where nick=?","s",nick);
+		if (!rst.next())
+			return -1;
+		else
+			return rst.getInt(1);
 	}
 	
 	public static String nickfromID(int id) throws SQLException
@@ -291,5 +301,26 @@ public class FPlayer {
 	public Menu getMenu()
 	{
 		return this.currMenu;
+	}
+	
+	public void setDeath(boolean pvp) throws SQLException {
+		final int DEATH_PVP_COOLDOWN = 4*3600;
+		final int DEATH_PVE_COOLDOWN = 2*3600;
+		
+		if (!this.isLogged) {
+			ResultSet rst = DBManager.performSafeQuery("select id from users where nick=?","s",assoc.getName());
+			if (!rst.next())
+				return;
+			
+			this.playerID = rst.getInt("id");
+		}
+		
+		DBManager.performSafeExecute("insert into deaths values (?,?)", "il", this.playerID, new Date().getTime() + ((pvp) ? DEATH_PVP_COOLDOWN : DEATH_PVE_COOLDOWN)*1000);
+		final FPlayer self = this;
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
+			public void run() {
+				self.assoc.kickPlayer("You're dead! You may connect again in "+((pvp)?4:2)+" hours.");
+			}
+		}, 1);
 	}
 }

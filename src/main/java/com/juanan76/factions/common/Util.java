@@ -2,20 +2,33 @@ package com.juanan76.factions.common;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.juanan76.factions.Main;
 import com.juanan76.factions.common.tellraw.TellRawComponent;
+import com.juanan76.factions.common.tellraw.TextComponent;
+import com.juanan76.factions.factions.gens.Generator;
+import com.juanan76.factions.npc.NPC;
+import com.juanan76.factions.npc.NPCShop;
+import com.juanan76.factions.npc.SellingItem;
+
+import net.md_5.bungee.api.chat.BaseComponent;
 
 public class Util {
 	public static String getMoney(long amt)
 	{
-		String ret = (amt < 0) ? ChatColor.RED + "-$" : ChatColor.GREEN + "$";
+		String ret = (amt < 0) ? ChatColor.RED + "-₽" : ChatColor.GREEN + "₽";
 		if (Math.abs(amt) < 1000)
 			return ret + amt;
 		else
@@ -48,7 +61,7 @@ public class Util {
 	{
 		String ret = (amt < 0) ? ChatColor.RED + "-" : ChatColor.GREEN + "";
 		if (Math.abs(amt) < 1000)
-			return ret + amt;
+			return ret + amt + ChatColor.RESET;
 		else
 		{
 			String quantity = Long.toString(amt);
@@ -73,7 +86,7 @@ public class Util {
 			else
 				ret += "";
 		}
-		return ret + ChatColor.WHITE;
+		return ret + ChatColor.RESET;
 	}
 	
 	public static int convertWorld(World w)
@@ -109,27 +122,23 @@ public class Util {
 		return i;
 	}
 	
-	public static int getNextID() throws SQLException
+	public static int getNextID(String table, String primaryKey) throws SQLException
 	{
-		ResultSet rst = DBManager.performQuery("select id from users order by id desc");
+		ResultSet rst = DBManager.performQuery("select id from "+table+" order by "+primaryKey+" desc");
 		if (!rst.next()) return 0;
 		else return rst.getInt(1)+1;
 	}
 	
-	public static void tellRaw(String user, TellRawComponent... stuff)
+	public static void tellRaw(FPlayer p, TellRawComponent... stuff)
 	{
-		String t = "tellraw "+user+" [";
-		String json = "";
-		for (TellRawComponent c : stuff)
-		{
-			if (c != null) json += ","+c.getRepr();
-		}
-		Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), t+json.substring(1)+"]");
+		BaseComponent[] components = Arrays.stream(stuff).filter(c -> c != null).map(c -> c.toBukkit()).toArray(BaseComponent[]::new);
+		
+		p.getPlayer().spigot().sendMessage(components);
 	}
 	
-	public static void tellSeparator(String user)
+	public static void tellSeparator(FPlayer user)
 	{
-		Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "tellraw "+user+" {\"text\":\"-----------------------------------------------\",\"color\":\"yellow\"}");
+		Util.tellRaw(user, new TextComponent("-----------------------------------------------", "yellow"));
 	}
 	
 	public static boolean isFull(Inventory i)
@@ -141,5 +150,54 @@ public class Util {
 				return false;
 		}
 		return true;
+	}
+	
+	public static String readableTimeDiff(long l) {
+		TimeUnit[] units = new TimeUnit[] { TimeUnit.HOURS, TimeUnit.MINUTES, TimeUnit.SECONDS };
+		
+		long remaining = l;
+		Map<TimeUnit,Long> result = new HashMap<TimeUnit, Long>();
+		for (TimeUnit u: units) {
+			long val = u.convert(remaining, TimeUnit.MILLISECONDS);
+			result.put(u, val);
+			remaining = remaining - u.toMillis(val);
+		}
+		
+		return result.get(TimeUnit.HOURS) + "h " + result.get(TimeUnit.MINUTES) + "m " + result.get(TimeUnit.SECONDS) + "s";
+	}
+	
+	public static void spawnNPCS() throws SQLException {
+		NPC shopGeneradores = new NPCShop(ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),-56,72,50),
+			Arrays.asList(new SellingItem[] { Generator.getStack(1),Generator.getStack(2),Generator.getStack(3),Generator.getStack(4),Generator.getStack(5),Generator.getStack(6),Generator.getStack(7),Generator.getStack(8),Generator.getStack(9),Generator.getStack(10) }));
+		Main.spawnShops.add(shopGeneradores);
+		Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
+		shopGeneradores.spawnEntity();
+		shopGeneradores.save("shop_generadores");
+		NPC shopMagic = new NPCShop(ChatColor.AQUA+ChatColor.BOLD.toString()+"Magic shop", new Location(Bukkit.getWorld("world"),-56,72,53),
+				Arrays.asList(new SellingItem[] {
+						new SellingItem(Material.EXPERIENCE_BOTTLE, ChatColor.RED+"[LL]"+ChatColor.WHITE+" Experience bottle", 250),
+						new SellingItem(Material.ENCHANTED_GOLDEN_APPLE,ChatColor.RED+"[LL]"+ChatColor.WHITE+"Gapple",15000),
+						new SellingItem(Material.TOTEM_OF_UNDYING,ChatColor.RED+"[LL]"+ChatColor.WHITE+"Lifesaver",50000)
+						}));
+		Main.spawnShops.add(shopMagic);
+		Bukkit.getPluginManager().registerEvents(shopMagic, Main.getPlugin(Main.class));
+		shopMagic.spawnEntity();
+		shopMagic.save("shop_magic");
+	}
+	
+	public static void loadNPCS() throws SQLException {
+		NPC shopGeneradores = new NPCShop("shop_generadores",ChatColor.DARK_RED+ChatColor.BOLD.toString()+"Faction shop", new Location(Bukkit.getWorld("world"),-56,72,50),
+				Arrays.asList(new SellingItem[] { Generator.getStack(1),Generator.getStack(2),Generator.getStack(3),Generator.getStack(4),Generator.getStack(5),Generator.getStack(6),Generator.getStack(7),Generator.getStack(8),Generator.getStack(9),Generator.getStack(10) }));
+		Main.spawnShops.add(shopGeneradores);
+		Bukkit.getPluginManager().registerEvents(shopGeneradores, Main.getPlugin(Main.class));
+		
+		NPC shopMagic = new NPCShop("shop_magic", ChatColor.AQUA+ChatColor.BOLD.toString()+"Magic shop", new Location(Bukkit.getWorld("world"),-56,72,53),
+				Arrays.asList(new SellingItem[] {
+						new SellingItem(Material.EXPERIENCE_BOTTLE, ChatColor.RED+"[LL]"+ChatColor.WHITE+" Experience bottle", 250),
+						new SellingItem(Material.ENCHANTED_GOLDEN_APPLE,ChatColor.RED+"[LL]"+ChatColor.WHITE+"Gapple",15000),
+						new SellingItem(Material.TOTEM_OF_UNDYING,ChatColor.RED+"[LL]"+ChatColor.WHITE+"Lifesaver",50000)
+						}));
+		Main.spawnShops.add(shopMagic);
+		Bukkit.getPluginManager().registerEvents(shopMagic, Main.getPlugin(Main.class));
 	}
 }

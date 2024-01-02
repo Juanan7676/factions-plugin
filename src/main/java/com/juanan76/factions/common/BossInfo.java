@@ -1,12 +1,17 @@
 package com.juanan76.factions.common;
 
+import java.sql.SQLException;
+import java.util.Iterator;
+
 import com.juanan76.factions.Main;
+import com.juanan76.factions.economy.TradeRequest;
+import com.juanan76.factions.factions.War;
 
 import net.md_5.bungee.api.ChatColor;
 
 public class BossInfo implements Runnable {
 	
-	public final String info = "    [J76 FACTIONS PUBLIC BETA v0.2] NOW TRADES ARE AVAILABLE!";
+	public final String info = "    [FACTIONS SERVER v0.4] SUERTE AHI AFUERA!";
 	
 	private int currOffset = 0;
 	private int tickCount = 0;
@@ -25,7 +30,25 @@ public class BossInfo implements Runnable {
 				t = info.substring(currOffset,26+currOffset);
 			else
 				t = info.substring(currOffset,l)+info.substring(0,26-l+currOffset);
-			Main.info.setTitle(ChatColor.AQUA+ChatColor.BOLD.toString()+t);
+			Main.info.setTitle(ChatColor.GOLD+ChatColor.BOLD.toString()+t);
+		}
+		
+		Iterator<TradeRequest> t = Main.traderequests.values().iterator();
+		while (t.hasNext())
+		{
+			TradeRequest tr = t.next();
+			if (tr.shouldRemove)
+				t.remove();
+		}
+		
+		Iterator<War> it = Main.wars.values().iterator();
+		while (it.hasNext()) {
+			War w = it.next();
+			try {
+				w.update();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

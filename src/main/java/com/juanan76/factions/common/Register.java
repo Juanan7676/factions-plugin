@@ -37,7 +37,7 @@ public class Register implements CommandExecutor {
 					}
 					else
 					{
-						int id = Util.getNextID();
+						int id = Util.getNextID("users","id");
 						DBManager.performSafeExecute("insert into users values (?,?,?)","iss",id,sender.getName(),args[0]);
 						DBManager.performSafeExecute("insert into dinero values (?,?)","ii",id,0);
 						Main.players.get(sender).sendMessage(PluginPart.MAIN, ChatColor.GREEN + "You're now registered to the server!");

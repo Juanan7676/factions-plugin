@@ -152,7 +152,7 @@ public class Trade {
 		public void onClick(InventoryClickEvent e)
 		{
 			super.onClick(e);
-			if (e.getClickedInventory().equals(e.getView().getBottomInventory()) && Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(super.view) && this.canAdd())
+			if (e.getClickedInventory() != null && e.getClickedInventory().equals(e.getView().getBottomInventory()) && Main.players.get(e.getWhoClicked()).isLogged() && e.getInventory().equals(super.view) && this.canAdd())
 			{
 				ItemStack i = e.getView().getItem(e.getRawSlot());
 				if (i!=null)

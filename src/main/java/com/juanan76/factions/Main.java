@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,6 +17,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.juanan76.factions.common.BossInfo;
@@ -28,11 +27,16 @@ import com.juanan76.factions.common.FPlayer;
 import com.juanan76.factions.common.Login;
 import com.juanan76.factions.common.Pay;
 import com.juanan76.factions.common.Register;
+import com.juanan76.factions.common.SQLExecuter;
 import com.juanan76.factions.common.Sell;
+import com.juanan76.factions.common.SpawnNPCS;
 import com.juanan76.factions.common.Util;
+import com.juanan76.factions.economy.EconomyProvider;
 import com.juanan76.factions.economy.Trade;
+import com.juanan76.factions.economy.TradeRequest;
 import com.juanan76.factions.factions.Faction;
 import com.juanan76.factions.factions.FactionCommand;
+import com.juanan76.factions.factions.War;
 import com.juanan76.factions.factions.gens.Generator;
 import com.juanan76.factions.npc.NPC;
 import com.juanan76.factions.pvp.Home;
@@ -43,11 +47,15 @@ import com.juanan76.factions.pvp.Spawn;
 import com.juanan76.factions.pvp.Tele;
 import com.juanan76.factions.pvp.Teleport;
 
+import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 
 public class Main extends JavaPlugin 
 {
+	
+	private static final long timeToRestart = 2*3600*20;
 	
 	public static final Map<Player,PvpPlayer> pvp = new HashMap<Player,PvpPlayer>();
 	public static final Map<Player,Integer> pvpUpdaters = new HashMap<Player,Integer>();
@@ -55,15 +63,20 @@ public class Main extends JavaPlugin
 	public static final Map<Integer,Faction> factions = new HashMap<Integer,Faction>();
 	public static final Map<Integer,Teleport> teleports = new HashMap<Integer,Teleport>();
 	public static final List<NPC> spawnShops = new Vector<NPC>();
+	
 	public static final List<Trade> trades = new Vector<Trade>();
+	public static final Map<FPlayer,TradeRequest> traderequests = new HashMap<FPlayer,TradeRequest>();
+	
 	public static final Map<Location,Generator> gens = new HashMap<Location,Generator>();
 	public static final BossBar info = Bukkit.createBossBar("", BarColor.PURPLE , BarStyle.SOLID);
-	public static final Map<String,String> prefixes = new HashMap<String,String>();
+	public static final Map<String,String> formats = new HashMap<String,String>();
+	public static final Map<Integer,War> wars = new HashMap<Integer,War>();
 	public static Permission perms = null;
 	
 	@Override
 	public void onEnable()
 	{
+		Bukkit.getServicesManager().register(Economy.class, new EconomyProvider(), Main.getPlugin(Main.class), ServicePriority.Highest);
 		Bukkit.getPluginManager().registerEvents(new PvpListeners(),this);
 		Bukkit.getPluginManager().registerEvents(new FListeners(), this);
 		this.getCommand("login").setExecutor(new Login());
@@ -75,6 +88,9 @@ public class Main extends JavaPlugin
 		this.getCommand("spawn").setExecutor(new Spawn());
 		this.getCommand("sethome").setExecutor(new Sethome());
 		this.getCommand("home").setExecutor(new Home());
+		this.getCommand("trade").setExecutor(new TradeRequest());
+		this.getCommand("sqlexec").setExecutor(new SQLExecuter());
+		this.getCommand("spawnnpcs").setExecutor(new SpawnNPCS());
 		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new BossInfo(), 1, 1);
 		
@@ -115,7 +131,7 @@ public class Main extends JavaPlugin
 			DBManager.performExecute("create table if not exists relaciones ("
 					+ "faccion1 integer,"
 					+ "faccion2 integer check (faccion1 != faccion2),"
-					+ "relacion char(1) check (relacion in ('a','w')),"
+					+ "relacion char(1) check (relacion in ('a','w','n')),"
 					+ "primary key (faccion1,faccion2),"
 					+ "foreign key (faccion1) references facciones(id) on delete cascade,"
 					+ "foreign key (faccion2) references facciones(id) on delete cascade)");
@@ -164,6 +180,25 @@ public class Main extends JavaPlugin
 					+ "progress integer,"
 					+ "primary key (world,x,y,z),"
 					+ "foreign key (faccion) references facciones(id) on delete cascade)");
+			DBManager.performExecute("create table if not exists deaths ("
+					+ "usuario integer primary key,"
+					+ "timestamp integer,"
+					+ "foreign key (usuario) references users(id) on delete cascade)");
+			DBManager.performExecute("create table if not exists wars (" +
+					"id integer primary key," +
+					"faction1 integer," +
+					"faction2 integer check (faction1 != faction2)," +
+					"status integer," +
+					"ticksToTransition integer, " +
+					"casualties1 integer," +
+					"casualties2 integer," +
+					"territory_lost_1 integer," +
+					"territory_lost_2 integer," +
+					"foreign key (faction1) references facciones(id) on delete cascade," +
+					"foreign key (faction2) references facciones(id) on delete cascade)");
+			DBManager.performExecute("create table if not exists npcs (" +
+					"npc_id varchar(10) primary key," +
+					"uuid varchar(50))");
 			// Load factions
 			ResultSet rst = DBManager.performQuery("select id from facciones");
 			while (rst.next())
@@ -179,24 +214,39 @@ public class Main extends JavaPlugin
 				Main.gens.put(l, new Generator(Main.factions.get(rst.getInt("faccion")), l, rst.getInt("lvl"), rst.getInt("progress")));
 			}
 			
+			// Load wars
+			rst = DBManager.performQuery("select id from wars");
+			while (rst.next()) {
+				Main.wars.put(rst.getInt("id"), new War(rst.getInt("id")));
+			}
+			
+			// Load NPCS
+			try {
+				Util.loadNPCS();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			YamlConfiguration config = YamlConfiguration.loadConfiguration(new File("plugins/Essentials/config.yml"));
 			Set<String> rangos = config.getConfigurationSection("chat.group-formats").getKeys(false);
-			
-			Pattern formato = Pattern.compile("^(.*) \\{DISPLAYNAME\\}.*");
 			for (String r : rangos)
 			{
 				String str = config.getString("chat.group-formats."+r);
-				System.out.println(str);
-				Matcher m = formato.matcher(str);
-				if (m.matches()) {
-					prefixes.put(r, m.group(1));
-					System.out.println(m.group(1));
-				}
-				
-				
+				formats.put(r, str);
 			}
 			setupPermissions();
+			
+			Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
+				public void run() {
+					Bukkit.broadcastMessage(ChatColor.DARK_RED + "The server will restart in 5 minutes!");
+				}
+			}, timeToRestart - 5*60*20);
+			
+			Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getPlugin(Main.class), new Runnable() {
+				public void run() {
+					Bukkit.getServer().shutdown();
+				}
+			}, timeToRestart);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -215,6 +265,10 @@ public class Main extends JavaPlugin
 			// Save generators
 			for (Generator g : Main.gens.values())
 				g.save();
+			// Save wars
+			for (War w : Main.wars.values()) {
+				w.save();
+			}
 			DBManager.closeConnection();
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -61,6 +61,8 @@ public class Sell implements CommandExecutor {
 		this.serverPrices.put(Material.BLAZE_ROD, 7L);
 		this.serverPrices.put(Material.STRING, 2L);
 		this.serverPrices.put(Material.WHITE_WOOL, 1L);
+		this.serverPrices.put(Material.COPPER_INGOT, 3L);
+		this.serverPrices.put(Material.COBBLED_DEEPSLATE, 1L);
 	}
 
 	@Override
