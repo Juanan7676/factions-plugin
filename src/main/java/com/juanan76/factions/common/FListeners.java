@@ -147,7 +147,8 @@ public class FListeners implements Listener {
 					String message = e.getMessage();
 					for (FPlayer p : Main.players.values()) {
 						if (!p.isLogged()) continue;
-						if (p.getPlayer().getLocation().distanceSquared(player.getPlayer().getLocation()) > 30*30 && message.charAt(0) != '!') continue;
+						if (Util.sameWorld(player.getPlayer().getLocation(), p.getPlayer().getLocation()) && p.getPlayer().getLocation().distanceSquared(player.getPlayer().getLocation()) > 30*30 && message.charAt(0) != '!') continue;
+						if (!Util.sameWorld(player.getPlayer().getLocation(), p.getPlayer().getLocation()) && message.charAt(0) != '!') continue;
 						List<TellRawComponent> l = new Vector<TellRawComponent>();
 						
 						String input1 = ChatColor.translateAlternateColorCodes('&', m.group(1));

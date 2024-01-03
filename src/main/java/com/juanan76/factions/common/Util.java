@@ -200,4 +200,8 @@ public class Util {
 		Main.spawnShops.add(shopMagic);
 		Bukkit.getPluginManager().registerEvents(shopMagic, Main.getPlugin(Main.class));
 	}
+
+	public static boolean sameWorld(Location loc1, Location loc2){
+		return loc1.getWorld().getName().equalsIgnoreCase(loc2.getWorld().getName());
+	}
 }
